@@ -16,7 +16,9 @@ import java.util.Map;
  * jerarquico (Single, Complete y Average Linkage) y evalua cada uno con la
  * correlacion cofenetica para determinar cual produce el agrupamiento mas
  * coherente.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class MotorClustering {
 
     private final RepositorioArticulos repositorioArticulos;

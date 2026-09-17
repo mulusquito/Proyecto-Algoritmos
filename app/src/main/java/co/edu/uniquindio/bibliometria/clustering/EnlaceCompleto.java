@@ -6,7 +6,9 @@ package co.edu.uniquindio.bibliometria.clustering;
  * Formula de actualizacion de Lance-Williams:
  * <pre> d(I∪J, M) = max( d(I,M), d(J,M) ) </pre>
  * Tiende a formar clusteres compactos y de tamano similar.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class EnlaceCompleto implements EstrategiaEnlace {
 
     @Override

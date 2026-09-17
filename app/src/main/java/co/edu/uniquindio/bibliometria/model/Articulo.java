@@ -8,7 +8,9 @@ import java.util.Objects;
  * docente). Solo se procesa computacionalmente el {@code abstract}; titulo y
  * autores son metadatos adicionales extraidos para trazabilidad y para
  * futuros requerimientos que crucen esta informacion.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class Articulo {
 
     private final int id;

@@ -24,7 +24,9 @@ import java.util.List;
  *     <li>Cargar el modelo de embeddings preentrenado.</li>
  *     <li>Ejecutar los 6 algoritmos sobre un par de articulos seleccionado por el usuario.</li>
  * </ul>
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class MotorSimilitud {
 
     private final RepositorioArticulos repositorioArticulos;

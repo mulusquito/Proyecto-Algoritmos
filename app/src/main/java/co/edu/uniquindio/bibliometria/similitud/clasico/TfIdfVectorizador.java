@@ -22,7 +22,9 @@ import java.util.Set;
  * una vez el termino t. El IDF se calcula una sola vez sobre todo el corpus
  * de 20 abstracts para que los pesos sean comparables entre cualquier par
  * de articulos que el usuario seleccione en la aplicacion.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class TfIdfVectorizador {
 
     private final Map<String, Double> idf = new HashMap<>();

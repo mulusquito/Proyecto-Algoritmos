@@ -22,7 +22,9 @@ import java.util.Map;
  * algoritmos de similitud basados en Inteligencia Artificial. El calculo
  * de la similitud (coseno y distancia euclidiana) sobre esos vectores se
  * implementa manualmente, sin usar ninguna libreria de similitud.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class RepositorioEmbeddings {
 
     private static final String RECURSO = "/embeddings/glove100_filtrado.tsv";

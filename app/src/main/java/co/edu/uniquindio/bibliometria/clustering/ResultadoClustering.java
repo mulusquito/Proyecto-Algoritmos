@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/** Resultado completo de ejecutar un algoritmo de clustering jerarquico: el dendrograma, los pasos de fusion y su evaluacion. */
+/** Resultado completo de ejecutar un algoritmo de clustering jerarquico: el dendrograma, los pasos de fusion y su evaluacion.  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class ResultadoClustering {
 
     private final String nombreEnlace;

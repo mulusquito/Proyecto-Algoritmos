@@ -26,7 +26,9 @@ import java.util.Map;
  * agrupamiento es mas coherente con los datos. Se implementa enteramente
  * desde cero (recorrido del arbol + calculo manual de la correlacion de
  * Pearson), sin usar Apache Commons Math ni ninguna libreria estadistica.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class CorrelacionCofenetica {
 
     /**

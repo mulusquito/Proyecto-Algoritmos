@@ -10,7 +10,9 @@ import java.util.Map;
  * resultado de la aplicacion (similitud, clustering, articulos) exponen un
  * metodo {@code aMapa()} que produce esa estructura generica, evitando
  * depender de anotaciones/reflexion de una libreria externa.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public final class JsonEscritor {
 
     private JsonEscritor() {

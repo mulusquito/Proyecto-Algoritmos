@@ -19,17 +19,29 @@ import java.util.List;
  * {@code similitud = 1 / (1 + distancia)}, conservando la distancia bruta
  * en el detalle del resultado para el analisis critico solicitado por el
  * proyecto.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class EuclidianaEmbeddingSimilitud {
 
     public static final String NOMBRE = "Distancia Euclidiana sobre Embeddings (IA)";
 
     private final VectorizadorEmbeddings vectorizador;
 
+    /**
+     * @param vectorizador convertidor de tokens a vector promedio de embeddings
+     */
     public EuclidianaEmbeddingSimilitud(VectorizadorEmbeddings vectorizador) {
         this.vectorizador = vectorizador;
     }
 
+    /**
+     * Calcula la distancia euclidiana (transformada a similitud) entre los embeddings de dos abstracts.
+     *
+     * @param tokensA tokens sin estemizar del primer abstract
+     * @param tokensB tokens sin estemizar del segundo abstract
+     * @return resultado con la similitud derivada en [0,1] y la distancia euclidiana bruta
+     */
     public ResultadoSimilitud calcular(List<String> tokensA, List<String> tokensB) {
         VectorDocumento va = vectorizador.vectorizar(tokensA);
         VectorDocumento vb = vectorizador.vectorizar(tokensB);

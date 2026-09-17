@@ -6,7 +6,9 @@ package co.edu.uniquindio.bibliometria.clustering;
  * Formula de actualizacion de Lance-Williams:
  * <pre> d(I∪J, M) = min( d(I,M), d(J,M) ) </pre>
  * Tiende a formar cadenas largas de clusteres (efecto "encadenamiento").
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class EnlaceSimple implements EstrategiaEnlace {
 
     @Override
