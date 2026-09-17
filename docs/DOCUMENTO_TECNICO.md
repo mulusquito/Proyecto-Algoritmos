@@ -91,6 +91,22 @@ el comportamiento de la aplicación —incluyendo la serialización de datos— 
 `mvn clean package` en cualquier entorno con acceso normal a internet. Esta decisión se declara también en
 `docs/DECLARACION_USO_IA.md`.
 
+### 2.4 Diagrama de clases y paquetes
+
+El siguiente diagrama resume las clases principales de cada paquete y sus relaciones de composición
+(línea sólida), dependencia de uso (línea punteada gris, "usa") e implementación de interfaz (línea
+punteada dorada). `BibliometriaApplication` es el punto de entrada: construye e inyecta manualmente
+(sin contenedor de inyección de dependencias) todos los objetos del sistema, siguiendo un estilo de
+*composición explícita* que hace visibles y auditables todas las dependencias entre clases.
+
+![Diagrama de clases y paquetes](imagenes/05-diagrama-clases.png)
+
+Los paquetes `similitud.clasico` y `similitud.ia` agrupan, respectivamente, los 4 algoritmos clásicos y
+los 2 algoritmos de IA del Requerimiento 1 (sección 4); el paquete `clustering`, junto con su
+subpaquete `clustering.evaluacion`, agrupa el algoritmo aglomerativo genérico, las 3 estrategias de
+enlace (patrón *Strategy* sobre la interfaz `EstrategiaEnlace`) y la métrica de validación del
+Requerimiento 2 (sección 5).
+
 ---
 
 ## 3. Fuentes de datos y preprocesamiento
@@ -328,8 +344,7 @@ una diferencia fundamental de qué es lo que cada familia de algoritmos realment
   literal**: cuentan caracteres o palabras que aparecen igual (o casi igual) en ambos textos. Dos abstracts
   pueden tratar exactamente el mismo tema con vocabulario distinto (sinónimos, paráfrasis) y aun así obtener
   una similitud clásica baja, como ocurre aquí: solo 15 de 113 palabras distintas son literalmente compartidas.
-- Los algoritmos de IA (embeddings) miden **cercanía semántica**: el modelo GloV
-e fue entrenado sobre un
+- Los algoritmos de IA (embeddings) miden **cercanía semántica**: el modelo GloVe fue entrenado sobre un
   corpus masivo de texto y aprendió que palabras usadas en contextos similares (p. ej. "students",
   "teachers", "learning", "assessment") tienen vectores cercanos, aunque los dos abstracts no compartan esas
   palabras exactas. Por eso el coseno sobre embeddings (0.96) refleja mucho mejor la intuición humana de que
@@ -349,6 +364,102 @@ e fue entrenado sobre un
 una revisión bibliográfica), los algoritmos de IA capturan mejor la similitud "real" que percibiría un
 investigador humano, mientras que los algoritmos clásicos son más útiles para detectar **coincidencia textual
 literal** (por ejemplo, para detectar plagio o abstracts casi duplicados), que es un problema distinto.
+
+### 4.5 Análisis formal de complejidad computacional (Requerimiento 1)
+
+Siguiendo la metodología vista en el curso —conteo de operaciones elementales, tabla del número de
+iteraciones de cada ciclo, derivación de T(n) y reducción a notación O mediante la regla de la suma para
+bloques secuenciales, la regla de la constante multiplicativa y la regla de los términos de orden
+inferior— se presenta el análisis de **peor caso** de los 6 algoritmos de similitud. Salvo que se indique
+lo contrario, n = |A| y m = |B| son la longitud (en caracteres o en tokens, según el algoritmo) de los dos
+abstracts comparados.
+
+#### 4.5.1 Distancia de Levenshtein — O(n·m)
+
+`LevenshteinSimilitud.construirMatriz` construye una matriz D de (n+1) filas por (m+1) columnas. El ciclo
+externo recorre las filas y, por cada fila, un ciclo interno recorre las columnas; dentro del ciclo interno
+se ejecuta un número constante c de operaciones elementales (una comparación de caracteres, una asignación,
+y en el peor caso tres comparaciones y una suma para obtener el mínimo):
+
+| Ciclo | Nº de iteraciones |
+|---|---|
+| Externo (fila i) | n+1 |
+| Interno (columna j), por cada i | m+1 |
+
+T(n,m) = (n+1)·(m+1)·c + O(n) + O(m) = c·n·m + c·n + c·m + c + n + m + 1
+
+Descartando los términos de orden inferior (n, m, constantes) frente al término dominante n·m, y aplicando
+la regla de la constante multiplicativa: **T(n,m) ∈ O(n·m)**, el mismo orden reportado en la literatura
+clásica de programación dinámica para distancia de edición (Wagner & Fischer, 1974).
+
+#### 4.5.2 Needleman-Wunsch — O(n·m)
+
+`NeedlemanWunschSimilitud.construirMatriz` tiene la misma estructura de doble ciclo anidado que Levenshtein
+sobre una matriz F de (n+1)×(m+1); solo cambia la función de puntuación por match/mismatch/gap, que es una
+comparación más una asignación (costo constante). El conteo de operaciones elementales es análogo al de
+4.5.1: **T(n,m) ∈ O(n·m)**, donde aquí n y m son el número de **tokens** (no caracteres) de cada abstract
+tras el preprocesamiento (tokenizar + quitar stopwords + stemming).
+
+#### 4.5.3 Similitud del Coseno sobre TF-IDF — O(N·V) una vez + O(d) por comparación
+
+Este algoritmo tiene dos fases con costos distintos:
+
+- **Construcción del IDF** (`TfIdfVectorizador`, calculada una sola vez sobre todo el corpus, sección 3.1):
+  un ciclo sobre los N=20 documentos y, por cada uno, un ciclo sobre los términos distintos del documento,
+  para acumular en cuántos documentos aparece cada término. T(N,V) = N·V·c ⇒ **O(N·V)**, donde V es el
+  tamaño del vocabulario del corpus.
+- **Cálculo del coseno entre un par de abstracts** (`CosenoTfIdfSimilitud.calcular`): un único ciclo de d
+  iteraciones sobre el vocabulario combinado de los dos vectores dispersos, acumulando en la misma
+  iteración el producto punto y las dos normas. T(d) = d·c ⇒ **O(d)**, con d ≤ V.
+
+Como el IDF se calcula una única vez y se reutiliza en todas las comparaciones, el costo que efectivamente
+se paga **por cada comparación de dos artículos** es O(d), lineal en el vocabulario combinado.
+
+#### 4.5.4 Coeficiente de Jaccard — O(n+m)
+
+`JaccardSimilitud.calcular` inserta los n tokens de A y los m tokens de B en dos conjuntos (`HashSet`, con
+costo amortizado O(1) por inserción mediante tabla hash), y luego recorre el conjunto más pequeño para
+contar la intersección. Son tres ciclos simples, no anidados entre sí:
+
+T(n,m) = n·c₁ (llenar conjunto A) + m·c₂ (llenar conjunto B) + min(n,m)·c₃ (intersección) + (n+m)·c₄ (unión)
+
+Por la regla de la suma de bloques secuenciales y la regla de las constantes: **T(n,m) ∈ O(n+m)**, lineal
+en el tamaño combinado de los dos documentos — el de menor orden de los 6 algoritmos.
+
+#### 4.5.5 Similitud del Coseno y Distancia Euclidiana sobre embeddings — O(k)
+
+Los dos algoritmos de IA comparten la misma estructura de costo, dominada por
+`VectorizadorEmbeddings.vectorizar`: un ciclo sobre los k tokens del documento, con una búsqueda en un
+`HashMap` (O(1) amortizado) y, si la palabra tiene vector, una suma componente a componente sobre un vector
+de **dimensión fija d=100** (constante del modelo GloVe, no una variable de la entrada):
+
+T(k) = k·c₁ + k·d·c₂
+
+Como d es una constante, k·d·c₂ es k·(constante)·c₂, que por la regla de la constante multiplicativa tiene
+el mismo orden que k. El paso final de cada algoritmo (`CosenoEmbeddingSimilitud`/
+`EuclidianaEmbeddingSimilitud.calcular`) recorre una sola vez los d=100 componentes de los dos vectores
+promedio ya calculados: O(d) = O(1) por ser d constante. Por la regla de la suma:
+**T(k) ∈ O(k)**, lineal en el número de tokens del documento, con una constante multiplicativa mayor que la
+de Jaccard (búsqueda en mapa + suma vectorial de 100 componentes por token, en vez de una simple inserción
+en un conjunto).
+
+#### 4.5.6 Resumen comparativo
+
+| Algoritmo | T(n) dominante | Orden | Variable dominante |
+|---|---|---|---|
+| Levenshtein | c·n·m | O(n·m) | n,m = caracteres |
+| Needleman-Wunsch | c·n·m | O(n·m) | n,m = tokens |
+| Coseno TF-IDF (por comparación) | c·d | O(d) | d = vocabulario combinado |
+| Jaccard | c·(n+m) | O(n+m) | n,m = tokens |
+| Coseno sobre embeddings | c·k | O(k) | k = tokens (d=100 es constante) |
+| Distancia Euclidiana sobre embeddings | c·k | O(k) | k = tokens (d=100 es constante) |
+
+Los dos algoritmos de programación dinámica (Levenshtein, Needleman-Wunsch) son, en notación asintótica,
+los más costosos (cuadráticos, O(n·m)) frente a los cuatro restantes (lineales). Sobre los 20 abstracts del
+corpus (cientos de caracteres, decenas de tokens cada uno) esta diferencia es imperceptible en tiempo de
+ejecución real, pero sería determinante si el corpus creciera a miles de documentos largos: es un ejemplo
+concreto de por qué el análisis asintótico importa incluso cuando, para una entrada pequeña, todos los
+algoritmos "se sienten igual de rápidos".
 
 ---
 
@@ -422,6 +533,74 @@ distancias entre todos los pares de artículos de los dos clusters que se fusion
 que en la práctica suele ajustarse mejor a corpus de texto con estructura temática difusa, como es el caso de
 20 revisiones de literatura sobre un dominio relacionado (IA en educación) donde los límites entre subtemas
 (alfabetización en IA, evaluación educativa, aprendizaje colaborativo, ChatGPT, etc.) no son tajantes.
+
+### 5.5 Análisis formal de complejidad computacional (Requerimiento 2)
+
+Se aplica la misma metodología de la sección 4.5. Sea n=20 el número de artículos del corpus (clusteres
+iniciales / hojas del dendrograma).
+
+#### 5.5.1 Algoritmo aglomerativo genérico — O(n³)
+
+`ClusteringJerarquico.ejecutar` realiza exactamente n-1 iteraciones (fusiones) hasta reducir los n
+clusteres iniciales a 1 solo. En la iteración k (k=1,…,n-1) hay (n-k+1) clusteres activos, y cada iteración
+ejecuta dos pasos:
+
+| Paso | Costo en la iteración k |
+|---|---|
+| 1. Buscar el par de clusteres con menor distancia (recorrido de la matriz activa) | O((n-k+1)²) |
+| 2. Actualizar distancias del nuevo cluster con Lance-Williams (`EstrategiaEnlace.calcular`, O(1) por par) | O(n-k+1) |
+
+Por la regla de los términos de orden inferior, el costo de la iteración k es O((n-k+1)²) + O(n-k+1) =
+O((n-k+1)²). Sumando sobre las n-1 iteraciones (regla de la suma):
+
+T(n) = Σ_{k=1}^{n-1} (n-k+1)² = Σ_{j=2}^{n} j² = [n(n+1)(2n+1)/6] − 1 ≈ n³/3 + términos de orden inferior
+
+(usando la identidad estándar Σ_{j=1}^{n} j² = n(n+1)(2n+1)/6). Descartando los términos de orden inferior
+(n², n) y la constante 1/3: **T(n) ∈ O(n³)**, el orden de complejidad estándar del clustering jerárquico
+aglomerativo implementado de forma directa (sin las estructuras de datos especializadas de algoritmos como
+SLINK/CLINK, que logran O(n²) únicamente para enlace simple/completo, no para enlace promedio genérico).
+
+Este análisis es **independiente del criterio de enlace usado**: `EnlaceSimple`, `EnlaceCompleto` y
+`EnlacePromedio` ejecutan la misma fórmula de Lance-Williams en tiempo O(1) por par de clusteres (una
+comparación `Math.min`/`Math.max`, o una suma ponderada con dos multiplicaciones y una división); cambiar
+de estrategia (patrón *Strategy*) cambia únicamente la constante multiplicativa c, no el orden O(n³) del
+algoritmo genérico.
+
+#### 5.5.2 Construcción de la matriz de distancias inicial — O(n²·d)
+
+Antes de iniciar el clustering, `DistanciaCorpus` calcula la distancia TF-IDF entre cada uno de los
+C(n,2) = n(n-1)/2 pares de artículos; cada cálculo de similitud coseno cuesta O(d) (sección 4.5.3, con d =
+tamaño del vocabulario combinado del par). T(n) = [n(n-1)/2]·O(d) ⇒ **O(n²·d)**. Para n=20 y d del orden de
+cientos de términos, este paso es, en la práctica, más costoso que las 19 iteraciones del algoritmo
+aglomerativo en sí, aunque ambos son de complejidad polinomial.
+
+#### 5.5.3 Correlación Cofenética — O(n²)
+
+`CorrelacionCofenetica.calcularMatrizCofenetica` obtiene, para cada nodo interno del dendrograma, el
+conjunto de hojas de su subárbol izquierdo y derecho mediante un único recorrido post-orden del árbol
+(O(n) nodos internos), y registra la altura de fusión de ese nodo para cada par (hoja izquierda, hoja
+derecha) de sus dos subárboles; cada uno de los C(n,2) pares de hojas se visita exactamente una vez a lo
+largo de todo el recorrido, dando T(n) = O(n²). Sobre las dos matrices resultantes (distancias originales
+y cofenéticas, ambas de n(n-1)/2 pares), `calcularCorrelacion` recorre los pares dos veces de forma lineal
+(una para las medias, otra para las sumas de productos y cuadrados del coeficiente de Pearson): dos ciclos
+de tamaño n(n-1)/2 ⇒ O(n²). Por la regla de la suma: **T(n) ∈ O(n²)**.
+
+#### 5.5.4 Resumen comparativo
+
+| Etapa | T(n) dominante | Orden |
+|---|---|---|
+| Matriz de distancias inicial (TF-IDF) | c·n²·d | O(n²·d) |
+| Algoritmo aglomerativo (Lance-Williams) | c·n³/3 | O(n³) |
+| Correlación cofenética | c·n² | O(n²) |
+
+El algoritmo aglomerativo genérico es la etapa asintóticamente más costosa, O(n³), lo cual coincide con lo
+reportado en la literatura: el clustering jerárquico aglomerativo "directo" (sin las optimizaciones
+específicas de SLINK/CLINK) escala mal a corpus grandes. Para el corpus de n=20 artículos del proyecto,
+n³=8000 comparaciones es un costo trivial en tiempo real (milisegundos); pero el análisis formal es
+precisamente lo que permite predecir que, por ejemplo, agrupar 2000 artículos (100 veces más) tomaría del
+orden de 100³ = 1 000 000 de veces más operaciones — no simplemente 100 veces más — lo cual justifica por
+qué, para corpus muy grandes, se preferirían algoritmos de clustering con mejor complejidad asintótica
+(p. ej. k-means, O(n·k) por iteración).
 
 ---
 

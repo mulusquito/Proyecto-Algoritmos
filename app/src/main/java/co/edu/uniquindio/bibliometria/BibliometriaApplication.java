@@ -18,7 +18,9 @@ import co.edu.uniquindio.bibliometria.web.ServidorHttp;
  * servidor HTTP), lo cual es perfectamente manejable dado el tamano del
  * proyecto y evita depender de Spring Boot (ver {@link ServidorHttp} para
  * la justificacion completa).
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class BibliometriaApplication {
 
     public static void main(String[] args) throws Exception {

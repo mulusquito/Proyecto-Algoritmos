@@ -17,7 +17,9 @@ import java.util.Map;
  * y 2 el maximo desacuerdo posible (vectores opuestos). Esta eleccion se
  * documenta explicitamente porque el enunciado permite research sobre
  * cualquier medida de similitud/distancia razonable para esta etapa.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class DistanciaCorpus {
 
     public static double[][] construirMatrizDistancias(List<Articulo> articulos, TfIdfVectorizador vectorizador) {

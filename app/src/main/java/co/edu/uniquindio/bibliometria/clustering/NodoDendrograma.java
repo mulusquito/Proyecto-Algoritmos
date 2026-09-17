@@ -11,7 +11,9 @@ import java.util.Map;
  * interno representa la fusion de dos clusteres a una determinada
  * "altura" (la distancia a la que se fusionaron, segun el criterio de
  * enlace usado).
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class NodoDendrograma {
 
     private final int id;

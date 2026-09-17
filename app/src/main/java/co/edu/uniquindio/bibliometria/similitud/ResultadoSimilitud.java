@@ -10,7 +10,9 @@ import java.util.Map;
  * matriz de programacion dinamica, o el numero de terminos en comun) para
  * poder demostrar el funcionamiento algoritmico paso a paso, tal como lo
  * exige el requerimiento 1 del proyecto.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class ResultadoSimilitud {
 
     private final String algoritmo;

@@ -21,11 +21,20 @@ import java.util.TreeSet;
  * Un valor de 1 indica que ambos abstracts usan exactamente el mismo
  * vocabulario (sin importar la frecuencia ni el orden de las palabras); un
  * valor de 0 indica que no comparten ninguna palabra.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class JaccardSimilitud {
 
     public static final String NOMBRE = "Coeficiente de Jaccard";
 
+    /**
+     * Calcula el coeficiente de Jaccard entre los conjuntos de tokens de dos abstracts.
+     *
+     * @param abstractA texto crudo del primer abstract
+     * @param abstractB texto crudo del segundo abstract
+     * @return resultado con la similitud J(A,B) en [0,1] y el detalle de los conjuntos
+     */
     public ResultadoSimilitud calcular(String abstractA, String abstractB) {
         List<String> tokensA = Preprocesador.procesarParaVectorial(abstractA);
         List<String> tokensB = Preprocesador.procesarParaVectorial(abstractB);

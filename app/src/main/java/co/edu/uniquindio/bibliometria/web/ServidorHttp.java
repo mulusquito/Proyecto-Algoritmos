@@ -44,7 +44,9 @@ import java.util.stream.Collectors;
  *     <li>{@code GET /api/clustering} (Requerimiento 2)</li>
  *     <li>Archivos estaticos del frontend (carpeta {@code static/})</li>
  * </ul>
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class ServidorHttp {
 
     private final HttpServer servidor;
@@ -59,11 +61,48 @@ public class ServidorHttp {
         this.motorClustering = motorClustering;
 
         this.servidor = HttpServer.create(new InetSocketAddress(puerto), 0);
-        servidor.createContext("/api/articulos", this::manejarArticulos);
-        servidor.createContext("/api/similitud", this::manejarSimilitud);
-        servidor.createContext("/api/clustering", this::manejarClustering);
-        servidor.createContext("/", this::manejarEstatico);
+        servidor.createContext("/api/articulos", conManejoDeErrores(this::manejarArticulos));
+        servidor.createContext("/api/similitud", conManejoDeErrores(this::manejarSimilitud));
+        servidor.createContext("/api/clustering", conManejoDeErrores(this::manejarClustering));
+        servidor.createContext("/", conManejoDeErrores(this::manejarEstatico));
         servidor.setExecutor(Executors.newFixedThreadPool(8));
+    }
+
+    /**
+     * Envuelve un manejador de rutas para gestionar de forma centralizada
+     * cualquier excepcion no controlada que pueda ocurrir al procesar una
+     * peticion (por ejemplo, un error inesperado al leer o serializar
+     * datos). Sin este envoltorio, el {@link HttpServer} del JDK simplemente
+     * cierra la conexion sin enviar respuesta cuando el handler lanza una
+     * excepcion, dejando al cliente sin ninguna informacion del error.
+     *
+     * @param manejador logica especifica de la ruta (puede lanzar {@link IOException})
+     * @return manejador equivalente que garantiza el envio de una respuesta HTTP,
+     *         incluso ante un fallo inesperado (500 con un mensaje de error en JSON)
+     */
+    private com.sun.net.httpserver.HttpHandler conManejoDeErrores(ManejadorConExcepcion manejador) {
+        return exchange -> {
+            try {
+                manejador.manejar(exchange);
+            } catch (IOException e) {
+                // Error de E/S al leer la peticion o escribir la respuesta: se
+                // registra pero no se puede garantizar el envio de una respuesta.
+                System.err.println("Error de E/S atendiendo " + exchange.getRequestURI() + ": " + e.getMessage());
+            } catch (Exception e) {
+                System.err.println("Error inesperado atendiendo " + exchange.getRequestURI() + ": " + e);
+                try {
+                    responderJson(exchange, 500, Map.of("error", "Error interno del servidor: " + e.getMessage()));
+                } catch (IOException ioException) {
+                    System.err.println("No se pudo enviar la respuesta de error: " + ioException.getMessage());
+                }
+            }
+        };
+    }
+
+    /** Variante de {@link com.sun.net.httpserver.HttpHandler} que permite propagar {@link IOException}. */
+    @FunctionalInterface
+    private interface ManejadorConExcepcion {
+        void manejar(HttpExchange exchange) throws IOException;
     }
 
     public void iniciar() {
