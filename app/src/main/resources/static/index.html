@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análisis de Algoritmos en el Contexto de la Bibliometría</title>
+<link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+<header>
+    <h1>Análisis de Algoritmos en el Contexto de la Bibliometría</h1>
+    <p class="subtitulo">Universidad del Quindío &middot; Programa de Ingeniería de Sistemas y Computación</p>
+    <nav>
+        <button class="tab-btn activo" data-tab="corpus">Corpus (20 artículos)</button>
+        <button class="tab-btn" data-tab="similitud">Requerimiento 1 · Similitud textual</button>
+        <button class="tab-btn" data-tab="clustering">Requerimiento 2 · Clustering jerárquico</button>
+        <button class="tab-btn" data-tab="acerca">Acerca del proyecto</button>
+    </nav>
+</header>
+
+<main>
+    <!-- ================= CORPUS ================= -->
+    <section id="tab-corpus" class="tab-contenido activo">
+        <h2>Corpus documental (20 abstracts)</h2>
+        <p>Artículos científicos suministrados como fuente de información. Solo se procesa computacionalmente el <em>abstract</em> de cada uno.</p>
+        <div id="tabla-articulos" class="cargando">Cargando artículos...</div>
+    </section>
+
+    <!-- ================= SIMILITUD ================= -->
+    <section id="tab-similitud" class="tab-contenido">
+        <h2>Requerimiento 1 &mdash; Análisis de Similitud Textual</h2>
+        <p>Selecciona dos artículos del corpus para compararlos con 4 algoritmos clásicos y 2 algoritmos basados en Inteligencia Artificial.</p>
+        <div class="selector-articulos">
+            <label>Artículo A:
+                <select id="select-articulo-a"></select>
+            </label>
+            <label>Artículo B:
+                <select id="select-articulo-b"></select>
+            </label>
+            <button id="btn-comparar">Comparar</button>
+        </div>
+        <div id="resultado-similitud"></div>
+    </section>
+
+    <!-- ================= CLUSTERING ================= -->
+    <section id="tab-clustering" class="tab-contenido">
+        <h2>Requerimiento 2 &mdash; Agrupamiento Jerárquico</h2>
+        <p>Dendrogramas construidos sobre los 20 abstracts, usando distancia = 1 &minus; similitud del coseno (TF-IDF), con los 3 criterios de enlace exigidos.</p>
+        <div id="resumen-clustering" class="cargando">Calculando clustering...</div>
+        <div class="clustering-tabs">
+            <button class="cluster-tab-btn activo" data-cluster="0">Single Linkage</button>
+            <button class="cluster-tab-btn" data-cluster="1">Complete Linkage</button>
+            <button class="cluster-tab-btn" data-cluster="2">Average Linkage</button>
+        </div>
+        <div id="contenedor-dendrograma"></div>
+    </section>
+
+    <!-- ================= ACERCA ================= -->
+    <section id="tab-acerca" class="tab-contenido">
+        <h2>Acerca del proyecto</h2>
+        <p>Esta aplicación implementa, desde cero (sin funciones de alto nivel de similitud/clustering), los algoritmos exigidos por el proyecto de curso
+        <em>"Análisis de algoritmos en el contexto de la bibliometría"</em>:</p>
+        <ul>
+            <li><strong>Requerimiento 1:</strong> Levenshtein, Needleman-Wunsch, Similitud del Coseno (TF-IDF) y Coeficiente de Jaccard (algoritmos clásicos); Similitud del Coseno y Distancia Euclidiana sobre embeddings preentrenados GloVe (algoritmos de IA).</li>
+            <li><strong>Requerimiento 2:</strong> Clustering jerárquico aglomerativo con enlace simple, completo y promedio (UPGMA), evaluado con el Coeficiente de Correlación Cofenética.</li>
+        </ul>
+        <p>El backend es una aplicación Java (JDK 17+) sin dependencias externas: usa <code>com.sun.net.httpserver</code> para la API REST y un
+        parser/escritor JSON propio. El uso de herramientas de IA generativa como apoyo al desarrollo se declara explícitamente en el documento técnico
+        del repositorio (carpeta <code>docs/</code>).</p>
+        <p>Repositorio: rama <code>develop</code> para el desarrollo, rama <code>main</code> para el despliegue.</p>
+    </section>
+</main>
+
+<footer>
+    <p>Proyecto de Algoritmos &middot; Universidad del Quindío &middot; 2026</p>
+</footer>
+
+<script src="/app.js"></script>
+</body>
+</html>

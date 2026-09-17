@@ -1,0 +1,53 @@
+package co.edu.uniquindio.bibliometria.similitud.clasico;
+
+import co.edu.uniquindio.bibliometria.similitud.ResultadoSimilitud;
+import co.edu.uniquindio.bibliometria.texto.Preprocesador;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+/**
+ * Algoritmo clasico de similitud basado en teoria de conjuntos:
+ * <b>Coeficiente de Jaccard</b>, implementado desde cero.
+ * <p>
+ * Cada abstract se representa como el <i>conjunto</i> de tokens distintos
+ * que contiene (tras preprocesamiento). El coeficiente se define como:
+ * <pre>
+ * J(A,B) = |A intersecto B| / |A union B|
+ * </pre>
+ * Un valor de 1 indica que ambos abstracts usan exactamente el mismo
+ * vocabulario (sin importar la frecuencia ni el orden de las palabras); un
+ * valor de 0 indica que no comparten ninguna palabra.
+ */
+public class JaccardSimilitud {
+
+    public static final String NOMBRE = "Coeficiente de Jaccard";
+
+    public ResultadoSimilitud calcular(String abstractA, String abstractB) {
+        List<String> tokensA = Preprocesador.procesarParaVectorial(abstractA);
+        List<String> tokensB = Preprocesador.procesarParaVectorial(abstractB);
+
+        Set<String> conjuntoA = new HashSet<>(tokensA);
+        Set<String> conjuntoB = new HashSet<>(tokensB);
+
+        Set<String> interseccion = new TreeSet<>(conjuntoA);
+        interseccion.retainAll(conjuntoB);
+
+        Set<String> union = new HashSet<>(conjuntoA);
+        union.addAll(conjuntoB);
+
+        double similitud = union.isEmpty() ? 0.0 : (double) interseccion.size() / union.size();
+
+        return new ResultadoSimilitud(NOMBRE, "clasico", similitud)
+                .conDetalle("tamanoConjuntoA", conjuntoA.size())
+                .conDetalle("tamanoConjuntoB", conjuntoB.size())
+                .conDetalle("tamanoInterseccion", interseccion.size())
+                .conDetalle("tamanoUnion", union.size())
+                .conDetalle("palabrasComunes", interseccion.size() <= 40
+                        ? new ArrayList<>(interseccion) : List.of("(> 40 palabras, omitido)"))
+                .conDetalle("formula", "J(A,B) = |A ∩ B| / |A ∪ B|");
+    }
+}

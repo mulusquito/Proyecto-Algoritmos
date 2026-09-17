@@ -1,0 +1,71 @@
+package co.edu.uniquindio.bibliometria.similitud.clasico;
+
+import co.edu.uniquindio.bibliometria.similitud.ResultadoSimilitud;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Algoritmo clasico de similitud basado en modelo de espacio vectorial:
+ * <b>Similitud del Coseno sobre vectores TF-IDF</b>.
+ * <p>
+ * Cada abstract se representa como un vector en un espacio de tantas
+ * dimensiones como terminos distintos existan en el corpus (ver
+ * {@link TfIdfVectorizador}), y se mide el coseno del angulo que forman
+ * los dos vectores. Dos documentos identicos en composicion de vocabulario
+ * (ponderado por relevancia) producen un angulo de 0 grados
+ * (similitud = 1); dos documentos sin ningun termino en comun producen un
+ * angulo de 90 grados (similitud = 0).
+ */
+public class CosenoTfIdfSimilitud {
+
+    public static final String NOMBRE = "Similitud del Coseno (TF-IDF)";
+
+    private final TfIdfVectorizador vectorizador;
+
+    public CosenoTfIdfSimilitud(TfIdfVectorizador vectorizador) {
+        this.vectorizador = vectorizador;
+    }
+
+    public ResultadoSimilitud calcular(List<String> tokensA, List<String> tokensB) {
+        Map<String, Double> vectorA = vectorizador.vectorizar(tokensA);
+        Map<String, Double> vectorB = vectorizador.vectorizar(tokensB);
+
+        double productoPunto = TfIdfVectorizador.productoPunto(vectorA, vectorB);
+        double normaA = TfIdfVectorizador.norma(vectorA);
+        double normaB = TfIdfVectorizador.norma(vectorB);
+        double coseno = (normaA == 0 || normaB == 0) ? 0.0 : productoPunto / (normaA * normaB);
+        coseno = Math.max(-1.0, Math.min(1.0, coseno));
+        double anguloGrados = Math.toDegrees(Math.acos(coseno));
+
+        // Top-10 terminos con mayor peso TF-IDF de cada documento, utiles
+        // para mostrar el "calculo de los pesos" exigido en la documentacion.
+        Map<String, Double> topA = topTerminos(vectorA, 10);
+        Map<String, Double> topB = topTerminos(vectorB, 10);
+
+        return new ResultadoSimilitud(NOMBRE, "clasico", coseno)
+                .conDetalle("productoPunto", productoPunto)
+                .conDetalle("normaVectorA", normaA)
+                .conDetalle("normaVectorB", normaB)
+                .conDetalle("anguloGrados", anguloGrados)
+                .conDetalle("dimensionesVectorA", vectorA.size())
+                .conDetalle("dimensionesVectorB", vectorB.size())
+                .conDetalle("topTerminosA", topA)
+                .conDetalle("topTerminosB", topB)
+                .conDetalle("formula", "cos(theta) = (A . B) / (||A|| * ||B||)");
+    }
+
+    private static Map<String, Double> topTerminos(Map<String, Double> vector, int n) {
+        List<Map.Entry<String, Double>> entradas = new java.util.ArrayList<>(vector.entrySet());
+        entradas.sort((e1, e2) -> {
+            int cmp = Double.compare(e2.getValue(), e1.getValue());
+            return cmp != 0 ? cmp : e1.getKey().compareTo(e2.getKey());
+        });
+        Map<String, Double> resultado = new LinkedHashMap<>();
+        for (int i = 0; i < Math.min(n, entradas.size()); i++) {
+            resultado.put(entradas.get(i).getKey(), entradas.get(i).getValue());
+        }
+        return resultado;
+    }
+}

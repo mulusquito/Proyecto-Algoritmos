@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>co.edu.uniquindio</groupId>
+    <artifactId>bibliometria-algoritmos</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>bibliometria-algoritmos</name>
+    <description>
+        Analisis de algoritmos en el contexto de la bibliometria - Universidad del Quindio.
+        Similitud textual (clasica e IA) y clustering jerarquico sobre abstracts cientificos.
+        Aplicacion Java sin dependencias externas (JDK 17+): usa com.sun.net.httpserver
+        para la API REST y un parser/escritor JSON propio, de modo que compila y corre
+        con solo `javac`/`java` o con Maven, sin necesitar acceso a Maven Central.
+    </description>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+        <finalName>bibliometria-algoritmos</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>co.edu.uniquindio.bibliometria.BibliometriaApplication</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
