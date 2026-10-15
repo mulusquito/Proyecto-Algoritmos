@@ -26,17 +26,27 @@ import java.util.Map;
 */
 public final class ContadorFrecuencias {
 
+    /** Constructor privado: la clase solo tiene metodos estaticos y no se instancia. */
     private ContadorFrecuencias() {
     }
 
+    /**
+     * Cuenta cuantas veces aparece cada termino en los abstracts de todos los
+     * articulos.
+     *
+     * @param articulos los articulos del corpus
+     * @return un par (termino, frecuencia) por cada termino distinto, en orden de primera aparicion
+     */
     public static TerminoFrecuencia[] contar(List<Articulo> articulos) {
         Map<String, Integer> conteo = new LinkedHashMap<>();
+        // Suma 1 al contador del termino cada vez que aparece (merge crea el contador en 1 si no existia).
         for (Articulo articulo : articulos) {
             for (String token : Preprocesador.procesarParaEmbeddings(articulo.getAbstractOriginal())) {
                 conteo.merge(token, 1, Integer::sum);
             }
         }
 
+        // Se pasa del mapa a un arreglo de pares, que es lo que reciben los algoritmos.
         TerminoFrecuencia[] terminos = new TerminoFrecuencia[conteo.size()];
         int i = 0;
         for (Map.Entry<String, Integer> entrada : conteo.entrySet()) {

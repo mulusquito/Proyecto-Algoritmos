@@ -13,6 +13,11 @@ import java.util.List;
  * parte de la aplicacion en si.
  */
 public class GenerarEjemploDocumentacion {
+    /**
+     * Imprime en consola la matriz de Levenshtein para "kitten" vs "sitting"
+     * y la matriz de Needleman-Wunsch para dos frases cortas, listas para
+     * copiar al documento tecnico.
+     */
     public static void main(String[] args) {
         String a = "AI literacy adult education";
         String b = "AI literacy higher education";
@@ -46,6 +51,10 @@ public class GenerarEjemploDocumentacion {
         System.out.println("Similitud normalizada = " + String.format("%.4f", resultadoNw.getSimilitud()));
     }
 
+    /**
+     * Imprime una matriz de Levenshtein como tabla Markdown: columnas = letras
+     * de b, filas = letras de a, y el simbolo vacio para la fila/columna 0.
+     */
     private static void imprimirMatrizMarkdown(int[][] m, String a, String b) {
         StringBuilder encabezado = new StringBuilder("| |");
         encabezado.append(" ∅ |");
@@ -66,6 +75,7 @@ public class GenerarEjemploDocumentacion {
         }
     }
 
+    /** Igual que {@link #imprimirMatrizMarkdown}, pero con palabras (tokens) en lugar de letras. */
     private static void imprimirMatrizMarkdownTokens(int[][] f, List<String> a, List<String> b) {
         StringBuilder encabezado = new StringBuilder("| |");
         encabezado.append(" ∅ |");

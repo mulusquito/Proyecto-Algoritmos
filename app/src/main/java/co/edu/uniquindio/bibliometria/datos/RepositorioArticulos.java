@@ -29,22 +29,32 @@ import java.util.Optional;
 */
 public class RepositorioArticulos {
 
+    /** Ruta, dentro de los recursos de la aplicacion, del JSON con los 20 articulos. */
     private static final String RECURSO = "/data/articulos.json";
 
+    /** Lista inmutable de los articulos, ordenada por id. */
     private List<Articulo> articulos;
 
+    /** Crea el repositorio y carga de inmediato los 20 articulos desde el JSON. */
     public RepositorioArticulos() {
         cargar();
     }
 
+    /**
+     * Lee el JSON del corpus, construye un {@link Articulo} por cada entrada,
+     * le precalcula sus dos listas de tokens (con y sin stemming) y deja la
+     * lista ordenada por id y protegida contra modificaciones.
+     */
     @SuppressWarnings("unchecked")
     private void cargar() {
         String contenido = leerRecursoClasspath(RECURSO);
         Object raiz = JsonParser.parsear(contenido);
+        // El JSON es un arreglo de objetos: cada objeto es un articulo.
         List<Object> crudos = (List<Object>) raiz;
 
         List<Articulo> resultado = new ArrayList<>();
         for (Object o : crudos) {
+            // Cada articulo llega como un mapa clave -> valor con sus campos.
             Map<String, Object> dto = (Map<String, Object>) o;
             int id = ((Number) dto.get("id")).intValue();
             String archivo = (String) dto.get("archivo");
@@ -53,6 +63,7 @@ public class RepositorioArticulos {
             String resumen = (String) dto.get("abstract");
 
             Articulo articulo = new Articulo(id, archivo, titulo, autores, resumen);
+            // Se preprocesa una sola vez aqui para que los algoritmos no lo repitan en cada peticion.
             articulo.setTokens(Preprocesador.procesarParaVectorial(resumen));
             articulo.setTokensEmbeddings(Preprocesador.procesarParaEmbeddings(resumen));
             resultado.add(articulo);
@@ -61,6 +72,15 @@ public class RepositorioArticulos {
         this.articulos = Collections.unmodifiableList(resultado);
     }
 
+    /**
+     * Lee completo un archivo empaquetado dentro de la aplicacion (classpath)
+     * y lo devuelve como texto UTF-8. Lee en bloques de 8 KB hasta llegar al
+     * final del archivo.
+     *
+     * @param ruta ruta del recurso, por ejemplo {@code /data/articulos.json}
+     * @return contenido del archivo como texto
+     * @throws IllegalStateException si el recurso no existe o no se puede leer
+     */
     private static String leerRecursoClasspath(String ruta) {
         try (InputStream is = RepositorioArticulos.class.getResourceAsStream(ruta)) {
             if (is == null) {
@@ -78,14 +98,22 @@ public class RepositorioArticulos {
         }
     }
 
+    /** @return los 20 articulos del corpus, ordenados por id (lista de solo lectura) */
     public List<Articulo> listarTodos() {
         return articulos;
     }
 
+    /**
+     * Busca un articulo por su numero.
+     *
+     * @param id numero del articulo (1 a 20)
+     * @return el articulo, o un {@link Optional} vacio si no existe
+     */
     public Optional<Articulo> buscarPorId(int id) {
         return articulos.stream().filter(a -> a.getId() == id).findFirst();
     }
 
+    /** @return cantidad de articulos cargados */
     public int total() {
         return articulos.size();
     }

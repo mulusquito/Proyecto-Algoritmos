@@ -24,7 +24,15 @@ import co.edu.uniquindio.bibliometria.web.ServidorHttp;
 */
 public class BibliometriaApplication {
 
+    /**
+     * Arranca la aplicacion: carga el corpus y el modelo de embeddings,
+     * construye los motores de cada requerimiento (algunos calculan sus
+     * resultados aqui mismo, al arrancar) y levanta el servidor web.
+     *
+     * @param args no se usan; el puerto se toma de la variable de entorno PORT (8080 si no existe)
+     */
     public static void main(String[] args) throws Exception {
+        // Plataformas como Render asignan el puerto mediante la variable PORT.
         int puerto = Integer.parseInt(System.getenv().getOrDefault("PORT", "8080"));
 
         System.out.println("Cargando corpus de articulos...");

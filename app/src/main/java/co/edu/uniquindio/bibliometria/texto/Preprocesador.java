@@ -25,6 +25,7 @@ import java.util.List;
 */
 public final class Preprocesador {
 
+    /** Constructor privado: la clase solo tiene metodos estaticos y no se instancia. */
     private Preprocesador() {
     }
 
@@ -63,6 +64,7 @@ public final class Preprocesador {
         return tokens;
     }
 
+    /** @return true si el texto esta formado solo por digitos (por ejemplo "2023"); esos tokens se descartan */
     private static boolean esSoloDigitos(String s) {
         for (int i = 0; i < s.length(); i++) {
             if (!Character.isDigit(s.charAt(i))) return false;

@@ -34,10 +34,14 @@ import java.util.List;
 */
 public class NeedlemanWunschSimilitud {
 
+    /** Nombre del algoritmo que se muestra en la interfaz. */
     public static final String NOMBRE = "Needleman-Wunsch (alineamiento global de tokens)";
 
+    /** Puntaje por alinear dos tokens iguales. */
     private static final int MATCH = 2;
+    /** Puntaje por alinear dos tokens distintos. */
     private static final int MISMATCH = -1;
+    /** Puntaje por dejar un token sin pareja (hueco). */
     private static final int GAP = -1;
 
     /**
@@ -52,6 +56,7 @@ public class NeedlemanWunschSimilitud {
         int m = b.size();
         int[][] f = new int[n + 1][m + 1];
 
+        // Casos base: alinear un prefijo contra nada solo se logra con huecos.
         for (int i = 0; i <= n; i++) {
             f[i][0] = i * GAP;
         }
@@ -59,8 +64,10 @@ public class NeedlemanWunschSimilitud {
             f[0][j] = j * GAP;
         }
 
+        // f[i][j] = mejor puntaje para alinear los primeros i tokens de a con los primeros j de b.
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= m; j++) {
+                // Tres opciones: emparejar los tokens (diagonal) o dejar uno con hueco (arriba / izquierda).
                 int puntajeSustitucion = a.get(i - 1).equals(b.get(j - 1)) ? MATCH : MISMATCH;
                 int diagonal = f[i - 1][j - 1] + puntajeSustitucion;
                 int arriba = f[i - 1][j] + GAP;
@@ -85,6 +92,7 @@ public class NeedlemanWunschSimilitud {
         int[][] matriz = construirMatriz(a, b);
         int puntajeFinal = matriz[a.size()][b.size()];
 
+        // Normalizacion a [0, 1] usando el mejor caso (todo coincide) y el peor (todo son huecos).
         int maxLen = Math.max(a.size(), b.size());
         double maximoPosible = maxLen * (double) MATCH;
         double minimoPosible = maxLen * (double) GAP;

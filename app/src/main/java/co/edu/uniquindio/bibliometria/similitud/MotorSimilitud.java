@@ -29,25 +29,35 @@ import java.util.List;
 */
 public class MotorSimilitud {
 
+    /** Fuente de los 20 articulos (necesaria para entrenar el TF-IDF con todo el corpus). */
     private final RepositorioArticulos repositorioArticulos;
+    /** Vectores de palabra preentrenados (GloVe) para los algoritmos con IA. */
     private final RepositorioEmbeddings repositorioEmbeddings;
 
+    // Algoritmos que no necesitan entrenamiento previo: se crean directamente.
     private final LevenshteinSimilitud levenshtein = new LevenshteinSimilitud();
     private final NeedlemanWunschSimilitud needlemanWunsch = new NeedlemanWunschSimilitud();
     private final JaccardSimilitud jaccard = new JaccardSimilitud();
 
+    // Algoritmos que dependen del corpus o del modelo de embeddings: se crean en inicializar().
     private TfIdfVectorizador tfIdfVectorizador;
     private CosenoTfIdfSimilitud cosenoTfIdf;
     private VectorizadorEmbeddings vectorizadorEmbeddings;
     private CosenoEmbeddingSimilitud cosenoEmbedding;
     private EuclidianaEmbeddingSimilitud euclidianaEmbedding;
 
+    /** Crea el motor y prepara de inmediato el TF-IDF y los vectorizadores de embeddings. */
     public MotorSimilitud(RepositorioArticulos repositorioArticulos, RepositorioEmbeddings repositorioEmbeddings) {
         this.repositorioArticulos = repositorioArticulos;
         this.repositorioEmbeddings = repositorioEmbeddings;
         inicializar();
     }
 
+    /**
+     * Entrena el vectorizador TF-IDF con los tokens de los 20 abstracts (para
+     * que el IDF refleje todo el corpus) y construye los algoritmos que
+     * dependen de el y del modelo de embeddings.
+     */
     private void inicializar() {
         List<List<String>> corpusTokenizado = new ArrayList<>();
         for (Articulo articulo : repositorioArticulos.listarTodos()) {
@@ -60,7 +70,15 @@ public class MotorSimilitud {
         this.euclidianaEmbedding = new EuclidianaEmbeddingSimilitud(vectorizadorEmbeddings);
     }
 
-    /** Ejecuta los 6 algoritmos de similitud sobre el par de articulos dado. */
+    /**
+     * Ejecuta los 6 algoritmos de similitud sobre el par de articulos dado.
+     * Cada algoritmo recibe la representacion que necesita: texto original
+     * (Levenshtein, Needleman-Wunsch y Jaccard hacen su propio
+     * preprocesamiento), tokens con stemming (TF-IDF) o tokens sin stemming
+     * (embeddings).
+     *
+     * @return los 6 resultados, en el orden en que se muestran en la interfaz
+     */
     public List<ResultadoSimilitud> compararArticulos(Articulo a, Articulo b) {
         List<String> tokensA = a.getTokens();
         List<String> tokensB = b.getTokens();
@@ -77,14 +95,17 @@ public class MotorSimilitud {
         return resultados;
     }
 
+    /** @return el vectorizador TF-IDF entrenado (lo reutiliza el clustering del Requerimiento 2) */
     public TfIdfVectorizador getTfIdfVectorizador() {
         return tfIdfVectorizador;
     }
 
+    /** @return la instancia de Levenshtein (usada para generar ejemplos de documentacion) */
     public LevenshteinSimilitud getLevenshtein() {
         return levenshtein;
     }
 
+    /** @return la instancia de Needleman-Wunsch (usada para generar ejemplos de documentacion) */
     public NeedlemanWunschSimilitud getNeedlemanWunsch() {
         return needlemanWunsch;
     }

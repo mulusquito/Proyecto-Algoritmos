@@ -31,6 +31,7 @@ import co.edu.uniquindio.bibliometria.texto.Preprocesador;
 */
 public class LevenshteinSimilitud {
 
+    /** Nombre del algoritmo que se muestra en la interfaz. */
     public static final String NOMBRE = "Levenshtein (distancia de edicion)";
 
     /**
@@ -47,6 +48,8 @@ public class LevenshteinSimilitud {
         int m = b.length();
         int[][] d = new int[n + 1][m + 1];
 
+        // Casos base: convertir un prefijo de i letras en la cadena vacia
+        // cuesta i borrados, y la cadena vacia en j letras cuesta j inserciones.
         for (int i = 0; i <= n; i++) {
             d[i][0] = i;
         }
@@ -54,13 +57,17 @@ public class LevenshteinSimilitud {
             d[0][j] = j;
         }
 
+        // Llenado fila por fila: d[i][j] = distancia entre los primeros i
+        // caracteres de a y los primeros j caracteres de b.
         for (int i = 1; i <= n; i++) {
             char ca = a.charAt(i - 1);
             for (int j = 1; j <= m; j++) {
                 char cb = b.charAt(j - 1);
                 if (ca == cb) {
+                    // Letras iguales: no hay costo, se hereda el valor de la diagonal.
                     d[i][j] = d[i - 1][j - 1];
                 } else {
+                    // Letras distintas: la operacion mas barata de las tres, mas 1.
                     int sustitucion = d[i - 1][j - 1] + 1;
                     int insercion = d[i][j - 1] + 1;
                     int borrado = d[i - 1][j] + 1;
@@ -83,7 +90,9 @@ public class LevenshteinSimilitud {
         String b = Preprocesador.normalizarParaEdicion(abstractB);
 
         int[][] matriz = construirMatriz(a, b);
+        // La esquina inferior derecha tiene la distancia entre las cadenas completas.
         int distancia = matriz[a.length()][b.length()];
+        // Normalizar por la longitud mayor deja la distancia en [0, 1].
         int maxLen = Math.max(a.length(), b.length());
         double distanciaNormalizada = maxLen == 0 ? 0.0 : (double) distancia / maxLen;
         double similitud = 1.0 - distanciaNormalizada;

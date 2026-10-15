@@ -22,15 +22,25 @@ import java.util.Map;
 */
 public class DistanciaCorpus {
 
+    /**
+     * Calcula la distancia {@code 1 - coseno(TF-IDF)} entre cada par de
+     * articulos.
+     *
+     * @param articulos    los articulos del corpus (ya con sus tokens con stemming)
+     * @param vectorizador vectorizador TF-IDF entrenado con todo el corpus
+     * @return matriz n x n simetrica con diagonal en 0
+     */
     public static double[][] construirMatrizDistancias(List<Articulo> articulos, TfIdfVectorizador vectorizador) {
         int n = articulos.size();
         double[][] distancias = new double[n][n];
 
+        // 1. Vector TF-IDF de cada abstract (se calcula una vez por articulo, no por par).
         Map<String, Double>[] vectores = new Map[n];
         for (int i = 0; i < n; i++) {
             vectores[i] = vectorizador.vectorizar(articulos.get(i).getTokens());
         }
 
+        // 2. Distancia de cada par i < j; se copia en [j][i] porque la matriz es simetrica.
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 double similitud = TfIdfVectorizador.similitudCoseno(vectores[i], vectores[j]);

@@ -21,25 +21,32 @@ package co.edu.uniquindio.bibliometria.ordenamiento;
 */
 public class RadixSort implements AlgoritmoOrdenamiento {
 
+    /** Nombre del algoritmo que se muestra en la interfaz. */
     public static final String NOMBRE = "Radix Sort (LSD, base 10)";
+    /** Base numerica: cada pasada ordena por un digito decimal (0 a 9). */
     private static final int BASE = 10;
 
+    /** @return nombre del algoritmo */
     @Override
     public String getNombre() {
         return NOMBRE;
     }
 
+    /** @return complejidad teorica, para mostrarla en la tabla de tiempos */
     @Override
     public String getComplejidad() {
         return "O(d · (n + b))";
     }
 
+    /** Ordena de mayor a menor frecuencia con d pasadas de Counting Sort, una por digito. */
     @Override
     public TerminoFrecuencia[] ordenarDescendente(TerminoFrecuencia[] entrada) {
+        // Copia de la entrada para no modificar el arreglo original.
         TerminoFrecuencia[] actual = new TerminoFrecuencia[entrada.length];
         for (int i = 0; i < entrada.length; i++) actual[i] = entrada[i];
         if (actual.length <= 1) return actual;
 
+        // La frecuencia maxima define cuantos digitos (pasadas) hacen falta.
         int maximo = 0;
         for (TerminoFrecuencia t : actual) {
             if (t.getFrecuencia() > maximo) maximo = t.getFrecuencia();
@@ -80,6 +87,10 @@ public class RadixSort implements AlgoritmoOrdenamiento {
         return salida;
     }
 
+    /**
+     * Extrae un digito del valor: con exp = 1 las unidades, con exp = 10 las
+     * decenas, etc. Por ejemplo digito(86, 10) = 8.
+     */
     private static int digito(int valor, long exp) {
         return (int) ((valor / exp) % BASE);
     }

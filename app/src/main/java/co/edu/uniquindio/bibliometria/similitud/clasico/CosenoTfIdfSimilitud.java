@@ -22,8 +22,10 @@ import java.util.Map;
 */
 public class CosenoTfIdfSimilitud {
 
+    /** Nombre del algoritmo que se muestra en la interfaz. */
     public static final String NOMBRE = "Similitud del Coseno (TF-IDF)";
 
+    /** Vectorizador ya entrenado con los 20 abstracts. */
     private final TfIdfVectorizador vectorizador;
 
     /**
@@ -48,6 +50,7 @@ public class CosenoTfIdfSimilitud {
         double normaA = TfIdfVectorizador.norma(vectorA);
         double normaB = TfIdfVectorizador.norma(vectorB);
         double coseno = (normaA == 0 || normaB == 0) ? 0.0 : productoPunto / (normaA * normaB);
+        // Se recorta a [-1, 1] porque el redondeo puede dar 1.0000000001 y acos fallaria.
         coseno = Math.max(-1.0, Math.min(1.0, coseno));
         double anguloGrados = Math.toDegrees(Math.acos(coseno));
 
@@ -68,6 +71,11 @@ public class CosenoTfIdfSimilitud {
                 .conDetalle("formula", "cos(theta) = (A . B) / (||A|| * ||B||)");
     }
 
+    /**
+     * Devuelve los n terminos de mayor peso del vector, de mayor a menor (a
+     * igual peso, en orden alfabetico). Solo se usa para mostrar el detalle
+     * en la interfaz, no para calcular la similitud.
+     */
     private static Map<String, Double> topTerminos(Map<String, Double> vector, int n) {
         List<Map.Entry<String, Double>> entradas = new java.util.ArrayList<>(vector.entrySet());
         entradas.sort((e1, e2) -> {

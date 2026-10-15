@@ -15,15 +15,28 @@ import java.util.Map;
 */
 public final class JsonEscritor {
 
+    /** Constructor privado: la clase solo tiene metodos estaticos y no se instancia. */
     private JsonEscritor() {
     }
 
+    /**
+     * Convierte un valor de Java (Map, List, String, numero, booleano, null
+     * o arreglos de int/double) en texto JSON.
+     *
+     * @param valor estructura a convertir
+     * @return el JSON como texto
+     */
     public static String escribir(Object valor) {
         StringBuilder sb = new StringBuilder();
         escribirValor(valor, sb);
         return sb.toString();
     }
 
+    /**
+     * Escribe cualquier valor en el {@link StringBuilder}, eligiendo la forma
+     * segun su tipo. Los mapas y listas se recorren de forma recursiva. Los
+     * decimales NaN o infinitos se escriben como null porque JSON no los admite.
+     */
     @SuppressWarnings("unchecked")
     private static void escribirValor(Object valor, StringBuilder sb) {
         if (valor == null) {
@@ -66,6 +79,7 @@ public final class JsonEscritor {
         }
     }
 
+    /** Escribe un mapa como objeto JSON: {"clave":valor,...}. */
     private static void escribirObjeto(Map<String, Object> mapa, StringBuilder sb) {
         sb.append('{');
         boolean primero = true;
@@ -79,6 +93,7 @@ public final class JsonEscritor {
         sb.append('}');
     }
 
+    /** Escribe una lista o conjunto como arreglo JSON: [valor,...]. */
     private static void escribirArreglo(Collection<Object> lista, StringBuilder sb) {
         sb.append('[');
         boolean primero = true;
@@ -90,6 +105,7 @@ public final class JsonEscritor {
         sb.append(']');
     }
 
+    /** Escribe un arreglo de enteros como arreglo JSON. */
     private static void escribirArregloInt(int[] arreglo, StringBuilder sb) {
         sb.append('[');
         for (int i = 0; i < arreglo.length; i++) {
@@ -99,6 +115,7 @@ public final class JsonEscritor {
         sb.append(']');
     }
 
+    /** Escribe una matriz de enteros como arreglo de arreglos JSON (por ejemplo una matriz de programacion dinamica). */
     private static void escribirMatrizInt(int[][] matriz, StringBuilder sb) {
         sb.append('[');
         for (int i = 0; i < matriz.length; i++) {
@@ -108,6 +125,7 @@ public final class JsonEscritor {
         sb.append(']');
     }
 
+    /** Escribe una matriz de decimales como arreglo de arreglos JSON (por ejemplo una matriz de distancias). */
     private static void escribirMatrizDouble(double[][] matriz, StringBuilder sb) {
         sb.append('[');
         for (int i = 0; i < matriz.length; i++) {
@@ -122,6 +140,11 @@ public final class JsonEscritor {
         sb.append(']');
     }
 
+    /**
+     * Escribe un texto entre comillas, escapando los caracteres que JSON no
+     * permite tal cual: comillas, barra invertida, saltos de linea,
+     * tabulaciones y caracteres de control.
+     */
     private static void escribirCadena(String texto, StringBuilder sb) {
         sb.append('"');
         for (int i = 0; i < texto.length(); i++) {

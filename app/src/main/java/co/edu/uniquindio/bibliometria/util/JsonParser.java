@@ -22,14 +22,27 @@ import java.util.Map;
 */
 public final class JsonParser {
 
+    /** Texto JSON completo que se esta leyendo. */
     private final String texto;
+    /** Posicion del siguiente caracter por leer. */
     private int pos;
 
+    /** Crea un parser posicionado al inicio del texto (se usa solo desde {@link #parsear}). */
     private JsonParser(String texto) {
         this.texto = texto;
         this.pos = 0;
     }
 
+    /**
+     * Convierte un texto JSON en estructuras de Java: los objetos se vuelven
+     * {@code Map<String, Object>}, los arreglos {@code List<Object>}, las
+     * cadenas {@code String}, los numeros {@code Integer}, {@code Long} o
+     * {@code Double}, y true/false/null sus equivalentes.
+     *
+     * @param texto JSON a leer
+     * @return el valor raiz del JSON
+     * @throws IllegalArgumentException si el JSON esta mal formado
+     */
     public static Object parsear(String texto) {
         JsonParser parser = new JsonParser(texto);
         parser.saltarEspacios();
@@ -38,6 +51,11 @@ public final class JsonParser {
         return valor;
     }
 
+    /**
+     * Lee un valor JSON cualquiera. El primer caracter decide el tipo:
+     * "{" objeto, "[" arreglo, comillas cadena, t/f booleano, n null y
+     * cualquier otro se trata como numero.
+     */
     private Object parsearValor() {
         char c = actual();
         switch (c) {
@@ -58,6 +76,11 @@ public final class JsonParser {
         }
     }
 
+    /**
+     * Lee un objeto {@code {"clave": valor, ...}}. Repite "clave : valor"
+     * hasta encontrar la llave de cierre. Usa {@link LinkedHashMap} para
+     * conservar el orden de las claves.
+     */
     private Map<String, Object> parsearObjeto() {
         Map<String, Object> mapa = new LinkedHashMap<>();
         consumir('{');
@@ -88,6 +111,7 @@ public final class JsonParser {
         return mapa;
     }
 
+    /** Lee un arreglo {@code [valor, valor, ...]} hasta encontrar el corchete de cierre. */
     private List<Object> parsearArreglo() {
         List<Object> lista = new ArrayList<>();
         consumir('[');
@@ -113,6 +137,11 @@ public final class JsonParser {
         return lista;
     }
 
+    /**
+     * Lee una cadena entre comillas, traduciendo las secuencias de escape
+     * (salto de linea, comillas, barra, codigos unicode de 4 digitos
+     * hexadecimales, etc.) al caracter que representan.
+     */
     private String parsearCadena() {
         consumir('"');
         StringBuilder sb = new StringBuilder();
@@ -144,6 +173,10 @@ public final class JsonParser {
         return sb.toString();
     }
 
+    /**
+     * Lee un numero. Si tiene punto decimal o exponente devuelve un
+     * {@code Double}; si no, un {@code Integer} (o {@code Long} si no cabe).
+     */
     private Object parsearNumero() {
         int inicio = pos;
         if (actual() == '-') pos++;
@@ -163,6 +196,7 @@ public final class JsonParser {
         }
     }
 
+    /** Avanza sobre una palabra fija (true, false, null) o lanza error si no esta. */
     private void esperar(String palabra) {
         if (!texto.startsWith(palabra, pos)) {
             throw new IllegalArgumentException("Se esperaba '" + palabra + "' en posicion " + pos);
@@ -170,6 +204,7 @@ public final class JsonParser {
         pos += palabra.length();
     }
 
+    /** Avanza un caracter si es el esperado; si no, lanza error con la posicion. */
     private void consumir(char esperado) {
         if (actual() != esperado) {
             throw new IllegalArgumentException("Se esperaba '" + esperado + "' en posicion " + pos);
@@ -177,10 +212,12 @@ public final class JsonParser {
         pos++;
     }
 
+    /** @return el caracter en la posicion actual, sin avanzar */
     private char actual() {
         return texto.charAt(pos);
     }
 
+    /** Avanza sobre espacios, tabulaciones y saltos de linea. */
     private void saltarEspacios() {
         while (pos < texto.length() && Character.isWhitespace(texto.charAt(pos))) {
             pos++;
