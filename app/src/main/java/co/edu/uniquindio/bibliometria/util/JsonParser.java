@@ -17,7 +17,9 @@ import java.util.Map;
  * Central) para traer una libreria como Jackson o Gson. Soporta el
  * subconjunto de JSON necesario para este proyecto: objetos, arreglos,
  * cadenas (con escapes basicos), numeros, booleanos y null.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public final class JsonParser {
 
     private final String texto;

@@ -26,7 +26,9 @@ import co.edu.uniquindio.bibliometria.texto.Preprocesador;
  * maxima de las dos cadenas, y se convierte en una similitud
  * {@code 1 - distancia_normalizada} para que quede en el rango [0,1], igual
  * que el resto de algoritmos.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class LevenshteinSimilitud {
 
     public static final String NOMBRE = "Levenshtein (distancia de edicion)";
@@ -35,6 +37,10 @@ public class LevenshteinSimilitud {
      * Calcula la matriz de programacion dinamica completa. Se expone por
      * separado para poder mostrar el "llenado de la matriz" exigido en la
      * documentacion del caso de estudio.
+     *
+     * @param a primera cadena ya normalizada (longitud n)
+     * @param b segunda cadena ya normalizada (longitud m)
+     * @return matriz D de tamano (n+1) x (m+1) con las distancias de edicion parciales
      */
     public int[][] construirMatriz(String a, String b) {
         int n = a.length();
@@ -65,6 +71,13 @@ public class LevenshteinSimilitud {
         return d;
     }
 
+    /**
+     * Calcula la similitud de Levenshtein entre dos abstracts.
+     *
+     * @param abstractA texto crudo del primer abstract
+     * @param abstractB texto crudo del segundo abstract
+     * @return resultado con la similitud en [0,1] y el detalle del calculo (distancia, longitudes, formula)
+     */
     public ResultadoSimilitud calcular(String abstractA, String abstractB) {
         String a = Preprocesador.normalizarParaEdicion(abstractA);
         String b = Preprocesador.normalizarParaEdicion(abstractB);

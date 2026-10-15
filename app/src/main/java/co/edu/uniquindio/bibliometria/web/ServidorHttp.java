@@ -4,6 +4,7 @@ import co.edu.uniquindio.bibliometria.clustering.MotorClustering;
 import co.edu.uniquindio.bibliometria.clustering.ResultadoClustering;
 import co.edu.uniquindio.bibliometria.datos.RepositorioArticulos;
 import co.edu.uniquindio.bibliometria.model.Articulo;
+import co.edu.uniquindio.bibliometria.ordenamiento.MotorRanking;
 import co.edu.uniquindio.bibliometria.similitud.MotorSimilitud;
 import co.edu.uniquindio.bibliometria.similitud.ResultadoSimilitud;
 import co.edu.uniquindio.bibliometria.util.JsonEscritor;
@@ -42,28 +43,72 @@ import java.util.stream.Collectors;
  *     <li>{@code GET /api/articulos} y {@code GET /api/articulos/{id}}</li>
  *     <li>{@code GET /api/similitud?idA=..&idB=..} (Requerimiento 1)</li>
  *     <li>{@code GET /api/clustering} (Requerimiento 2)</li>
+ *     <li>{@code GET /api/ranking?top=15&repeticiones=50} (Seguimiento: ranking de terminos)</li>
  *     <li>Archivos estaticos del frontend (carpeta {@code static/})</li>
  * </ul>
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class ServidorHttp {
 
     private final HttpServer servidor;
     private final RepositorioArticulos repositorioArticulos;
     private final MotorSimilitud motorSimilitud;
     private final MotorClustering motorClustering;
+    private final MotorRanking motorRanking;
 
     public ServidorHttp(int puerto, RepositorioArticulos repositorioArticulos,
-                         MotorSimilitud motorSimilitud, MotorClustering motorClustering) throws IOException {
+                         MotorSimilitud motorSimilitud, MotorClustering motorClustering,
+                         MotorRanking motorRanking) throws IOException {
         this.repositorioArticulos = repositorioArticulos;
         this.motorSimilitud = motorSimilitud;
         this.motorClustering = motorClustering;
+        this.motorRanking = motorRanking;
 
         this.servidor = HttpServer.create(new InetSocketAddress(puerto), 0);
-        servidor.createContext("/api/articulos", this::manejarArticulos);
-        servidor.createContext("/api/similitud", this::manejarSimilitud);
-        servidor.createContext("/api/clustering", this::manejarClustering);
-        servidor.createContext("/", this::manejarEstatico);
+        servidor.createContext("/api/articulos", conManejoDeErrores(this::manejarArticulos));
+        servidor.createContext("/api/similitud", conManejoDeErrores(this::manejarSimilitud));
+        servidor.createContext("/api/clustering", conManejoDeErrores(this::manejarClustering));
+        servidor.createContext("/api/ranking", conManejoDeErrores(this::manejarRanking));
+        servidor.createContext("/",conManejoDeErrores(this::manejarEstatico));
         servidor.setExecutor(Executors.newFixedThreadPool(8));
+    }
+
+    /**
+     * Envuelve un manejador de rutas para gestionar de forma centralizada
+     * cualquier excepcion no controlada que pueda ocurrir al procesar una
+     * peticion (por ejemplo, un error inesperado al leer o serializar
+     * datos). Sin este envoltorio, el {@link HttpServer} del JDK simplemente
+     * cierra la conexion sin enviar respuesta cuando el handler lanza una
+     * excepcion, dejando al cliente sin ninguna informacion del error.
+     *
+     * @param manejador logica especifica de la ruta (puede lanzar {@link IOException})
+     * @return manejador equivalente que garantiza el envio de una respuesta HTTP,
+     *         incluso ante un fallo inesperado (500 con un mensaje de error en JSON)
+     */
+    private com.sun.net.httpserver.HttpHandler conManejoDeErrores(ManejadorConExcepcion manejador) {
+        return exchange -> {
+            try {
+                manejador.manejar(exchange);
+            } catch (IOException e) {
+                // Error de E/S al leer la peticion o escribir la respuesta: se
+                // registra pero no se puede garantizar el envio de una respuesta.
+                System.err.println("Error de E/S atendiendo " + exchange.getRequestURI() + ": " + e.getMessage());
+            } catch (Exception e) {
+                System.err.println("Error inesperado atendiendo " + exchange.getRequestURI() + ": " + e);
+                try {
+                    responderJson(exchange, 500, Map.of("error", "Error interno del servidor: " + e.getMessage()));
+                } catch (IOException ioException) {
+                    System.err.println("No se pudo enviar la respuesta de error: " + ioException.getMessage());
+                }
+            }
+        };
+    }
+
+    /** Variante de {@link com.sun.net.httpserver.HttpHandler} que permite propagar {@link IOException}. */
+    @FunctionalInterface
+    private interface ManejadorConExcepcion {
+        void manejar(HttpExchange exchange) throws IOException;
     }
 
     public void iniciar() {
@@ -148,6 +193,26 @@ public class ServidorHttp {
         respuesta.put("algoritmoMasCoherente", mejor.getNombreEnlace());
         respuesta.put("correlacionCofeneticaMejor", mejor.getCorrelacionCofenetica());
         responderJson(exchange, 200, respuesta);
+    }
+
+    private void manejarRanking(HttpExchange exchange) throws IOException {
+        if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+            responderJson(exchange, 405, Map.of("error", "Metodo no soportado"));
+            return;
+        }
+        Map<String, String> query = parsearQuery(exchange.getRequestURI().getRawQuery());
+        try {
+            int top = Integer.parseInt(query.getOrDefault("top", String.valueOf(MotorRanking.TOP_POR_DEFECTO)));
+            int repeticiones = Integer.parseInt(query.getOrDefault("repeticiones",
+                    String.valueOf(MotorRanking.REPETICIONES_POR_DEFECTO)));
+            if (top < 1 || top > 100 || repeticiones < 1 || repeticiones > 500) {
+                responderJson(exchange, 400, Map.of("error", "Rangos validos: top 1-100, repeticiones 1-500"));
+                return;
+            }
+            responderJson(exchange, 200, motorRanking.ejecutarComoMapa(top, repeticiones));
+        } catch (NumberFormatException e) {
+            responderJson(exchange, 400, Map.of("error", "Parametros invalidos. Uso: /api/ranking?top=15&repeticiones=50"));
+        }
     }
 
     // -----------------------------------------------------------------

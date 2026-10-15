@@ -14,6 +14,7 @@
         <button class="tab-btn activo" data-tab="corpus">Corpus (20 artículos)</button>
         <button class="tab-btn" data-tab="similitud">Requerimiento 1 · Similitud textual</button>
         <button class="tab-btn" data-tab="clustering">Requerimiento 2 · Clustering jerárquico</button>
+        <button class="tab-btn" data-tab="ranking">Seguimiento · Ranking de términos</button>
         <button class="tab-btn" data-tab="acerca">Acerca del proyecto</button>
     </nav>
 </header>
@@ -55,6 +56,25 @@
         <div id="contenedor-dendrograma"></div>
     </section>
 
+    <!-- ================= RANKING (SEGUIMIENTO) ================= -->
+    <section id="tab-ranking" class="tab-contenido">
+        <h2>Seguimiento &mdash; Ranking de términos mediante algoritmos de ordenamiento</h2>
+        <p>Lista de frecuencias de los términos de los 20 abstracts (sin stopwords, sin stemming), ordenada de mayor a menor con tres
+        algoritmos que <strong>no comparan</strong> elementos entre sí: Counting Sort, Radix Sort y Bucket Sort.</p>
+        <div class="selector-articulos">
+            <label>Repeticiones medidas:
+                <select id="select-repeticiones">
+                    <option value="20">20</option>
+                    <option value="50" selected>50</option>
+                    <option value="200">200</option>
+                </select>
+            </label>
+            <button id="btn-medir">Volver a medir</button>
+        </div>
+        <div id="resumen-ranking" class="cargando">Ordenando y midiendo...</div>
+        <div id="resultado-ranking"></div>
+    </section>
+
     <!-- ================= ACERCA ================= -->
     <section id="tab-acerca" class="tab-contenido">
         <h2>Acerca del proyecto</h2>
@@ -63,6 +83,7 @@
         <ul>
             <li><strong>Requerimiento 1:</strong> Levenshtein, Needleman-Wunsch, Similitud del Coseno (TF-IDF) y Coeficiente de Jaccard (algoritmos clásicos); Similitud del Coseno y Distancia Euclidiana sobre embeddings preentrenados GloVe (algoritmos de IA).</li>
             <li><strong>Requerimiento 2:</strong> Clustering jerárquico aglomerativo con enlace simple, completo y promedio (UPGMA), evaluado con el Coeficiente de Correlación Cofenética.</li>
+            <li><strong>Seguimiento:</strong> ranking de los términos más frecuentes del corpus con Counting Sort, Radix Sort y Bucket Sort, con medición de tiempos en milisegundos.</li>
         </ul>
         <p>El backend es una aplicación Java (JDK 17+) sin dependencias externas: usa <code>com.sun.net.httpserver</code> para la API REST y un
         parser/escritor JSON propio. El uso de herramientas de IA generativa como apoyo al desarrollo se declara explícitamente en el documento técnico

@@ -6,12 +6,14 @@
 let ARTICULOS = [];
 let CLUSTERING_RESPUESTA = null;
 let CLUSTER_ACTUAL = 0;
+let RANKING_CARGADO = false;
 
 document.addEventListener("DOMContentLoaded", () => {
     configurarTabs();
     configurarTabsClustering();
     cargarArticulos();
     document.getElementById("btn-comparar").addEventListener("click", ejecutarComparacion);
+    document.getElementById("btn-medir").addEventListener("click", cargarRanking);
 });
 
 // ------------------------------------------------------------
@@ -26,6 +28,9 @@ function configurarTabs() {
             document.getElementById("tab-" + btn.dataset.tab).classList.add("activo");
             if (btn.dataset.tab === "clustering" && !CLUSTERING_RESPUESTA) {
                 cargarClustering();
+            }
+            if (btn.dataset.tab === "ranking" && !RANKING_CARGADO) {
+                cargarRanking();
             }
         });
     });
@@ -265,6 +270,77 @@ function construirSvgDendrograma(raiz) {
     dibujar(raiz);
 
     return svg;
+}
+
+// ------------------------------------------------------------
+// Seguimiento: Ranking de terminos (Counting, Radix y Bucket Sort)
+// ------------------------------------------------------------
+async function cargarRanking() {
+    const resumen = document.getElementById("resumen-ranking");
+    const repeticiones = document.getElementById("select-repeticiones").value;
+    resumen.innerHTML = `<p class="cargando">Ordenando y midiendo los 3 algoritmos (${repeticiones} repeticiones)...</p>`;
+    const respuesta = await fetch(`/api/ranking?top=15&repeticiones=${repeticiones}`);
+    const datos = await respuesta.json();
+    if (!respuesta.ok) {
+        resumen.innerHTML = `<p style="color:#b3552b">${escaparHtml(datos.error || "Error")}</p>`;
+        return;
+    }
+    RANKING_CARGADO = true;
+    renderizarRanking(datos);
+}
+
+function renderizarRanking(datos) {
+    const c = datos.corpus;
+    const resumen = document.getElementById("resumen-ranking");
+    resumen.innerHTML = `
+        <p><strong>${c.terminosDistintos}</strong> términos distintos (n) &middot; ${c.totalTokens} tokens en total &middot;
+        frecuencia máxima k = <strong>${c.frecuenciaMaxima}</strong> &middot; ${c.valoresDeFrecuenciaDistintos} valores de frecuencia distintos &middot;
+        Radix: d = ${c.digitosRadix} dígitos &middot; Bucket: ${c.cubetasOcupadas} de ${c.cubetas} cubetas ocupadas (la mayor con ${c.cubetaMasGrande} términos)</p>
+        <p>${datos.losTresCoinciden
+            ? '<span class="badge-mejor">Validado</span> Los tres algoritmos producen exactamente el mismo orden para los ' + c.terminosDistintos + ' términos.'
+            : '<span style="color:#b3552b">Los algoritmos NO produjeron el mismo orden.</span>'}</p>`;
+
+    let html = `<h3>Medición empírica (tiempo real de ejecución, en milisegundos)</h3>
+        <table>
+            <thead><tr><th>Algoritmo</th><th>Complejidad</th><th>Promedio</th><th>Mediana</th><th>Mínimo</th><th>Máximo</th><th>Desv. est.</th></tr></thead>
+            <tbody>`;
+    const maxPromedio = Math.max(...datos.resultados.map(r => r.promedioMs));
+    for (const r of datos.resultados) {
+        html += `<tr>
+            <td data-etiqueta="Algoritmo">${escaparHtml(r.algoritmo)} ${r.ordenCorrecto ? "" : '<span style="color:#b3552b">(orden incorrecto)</span>'}
+                <div class="barra-fondo"><div class="barra-relleno" style="width:${(r.promedioMs / maxPromedio * 100).toFixed(1)}%"></div></div></td>
+            <td data-etiqueta="Complejidad">${escaparHtml(r.complejidad)}</td>
+            <td data-etiqueta="Promedio">${r.promedioMs.toFixed(4)}</td>
+            <td data-etiqueta="Mediana">${r.medianaMs.toFixed(4)}</td>
+            <td data-etiqueta="Mínimo">${r.minimoMs.toFixed(4)}</td>
+            <td data-etiqueta="Máximo">${r.maximoMs.toFixed(4)}</td>
+            <td data-etiqueta="Desv. est.">${r.desviacionMs.toFixed(4)}</td>
+        </tr>`;
+    }
+    html += `</tbody></table>
+        <p class="nota">Cada algoritmo se ejecuta ${datos.resultados[0].repeticiones} veces (después de un calentamiento de la JVM) sobre la misma lista de frecuencias; las repeticiones se intercalan entre algoritmos.</p>`;
+
+    html += `<h3>Validación: 15 términos más frecuentes según cada algoritmo</h3><div class="tablas-ranking">`;
+    for (const r of datos.resultados) {
+        const maxFrecuencia = r.top.length ? r.top[0].frecuencia : 1;
+        let filas = "";
+        r.top.forEach((t, i) => {
+            filas += `<tr>
+                <td>${i + 1}</td>
+                <td>${escaparHtml(t.termino)}</td>
+                <td class="celda-frecuencia">
+                    <div class="barra-fondo"><div class="barra-relleno" style="width:${(t.frecuencia / maxFrecuencia * 100).toFixed(1)}%"></div></div>
+                    <span>${t.frecuencia}</span>
+                </td>
+            </tr>`;
+        });
+        html += `<div class="tabla-ranking">
+            <h4>${escaparHtml(r.algoritmo)}</h4>
+            <table><thead><tr><th>#</th><th>Término</th><th>Frecuencia</th></tr></thead><tbody>${filas}</tbody></table>
+        </div>`;
+    }
+    html += `</div>`;
+    document.getElementById("resultado-ranking").innerHTML = html;
 }
 
 // ------------------------------------------------------------

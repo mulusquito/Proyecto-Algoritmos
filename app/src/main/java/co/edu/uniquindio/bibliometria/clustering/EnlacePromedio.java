@@ -9,7 +9,9 @@ package co.edu.uniquindio.bibliometria.clustering;
  * <pre> d(I∪J, M) = ( |I|*d(I,M) + |J|*d(J,M) ) / (|I| + |J|) </pre>
  * Ofrece un balance intermedio entre el encadenamiento del enlace simple y
  * la rigidez del enlace completo.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class EnlacePromedio implements EstrategiaEnlace {
 
     @Override

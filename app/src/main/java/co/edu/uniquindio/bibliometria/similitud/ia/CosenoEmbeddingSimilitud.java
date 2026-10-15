@@ -16,17 +16,29 @@ import java.util.List;
  * semanticas aprendidas de un gran corpus de texto: por ejemplo, palabras
  * como "teacher" y "instructor" tendran vectores cercanos aunque nunca
  * coincidan textualmente.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class CosenoEmbeddingSimilitud {
 
     public static final String NOMBRE = "Similitud del Coseno sobre Embeddings (IA)";
 
     private final VectorizadorEmbeddings vectorizador;
 
+    /**
+     * @param vectorizador convertidor de tokens a vector promedio de embeddings
+     */
     public CosenoEmbeddingSimilitud(VectorizadorEmbeddings vectorizador) {
         this.vectorizador = vectorizador;
     }
 
+    /**
+     * Calcula la similitud del coseno entre los vectores de embeddings de dos abstracts.
+     *
+     * @param tokensA tokens sin estemizar (ver {@link co.edu.uniquindio.bibliometria.texto.Preprocesador#procesarParaEmbeddings}) del primer abstract
+     * @param tokensB tokens sin estemizar del segundo abstract
+     * @return resultado con el coseno en [-1,1] y el detalle de cobertura de vocabulario
+     */
     public ResultadoSimilitud calcular(List<String> tokensA, List<String> tokensB) {
         VectorDocumento va = vectorizador.vectorizar(tokensA);
         VectorDocumento vb = vectorizador.vectorizar(tokensB);

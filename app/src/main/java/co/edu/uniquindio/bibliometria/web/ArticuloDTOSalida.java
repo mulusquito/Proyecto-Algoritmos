@@ -5,7 +5,9 @@ import co.edu.uniquindio.bibliometria.model.Articulo;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Representacion de un articulo expuesta por la API (evita serializar la lista de tokens internos). */
+/** Representacion de un articulo expuesta por la API (evita serializar la lista de tokens internos).  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class ArticuloDTOSalida {
     private final int id;
     private final String archivo;
