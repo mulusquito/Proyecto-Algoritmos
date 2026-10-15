@@ -9,7 +9,7 @@ package co.edu.uniquindio.bibliometria.ordenamiento;
  * algoritmos producen exactamente el mismo ranking, lo que permite validar
  * unos contra otros.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public interface AlgoritmoOrdenamiento {
 

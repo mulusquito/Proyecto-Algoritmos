@@ -23,7 +23,7 @@ import java.util.Map;
  * de la similitud (coseno y distancia euclidiana) sobre esos vectores se
  * implementa manualmente, sin usar ninguna libreria de similitud.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class RepositorioEmbeddings {
 

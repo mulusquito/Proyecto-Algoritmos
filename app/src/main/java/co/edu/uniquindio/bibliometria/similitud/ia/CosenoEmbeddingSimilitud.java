@@ -17,7 +17,7 @@ import java.util.List;
  * como "teacher" y "instructor" tendran vectores cercanos aunque nunca
  * coincidan textualmente.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class CosenoEmbeddingSimilitud {
 

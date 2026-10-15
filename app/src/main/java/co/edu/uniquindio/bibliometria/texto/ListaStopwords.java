@@ -12,7 +12,7 @@ import java.util.Set;
  * restriccion del proyecto de no usar funciones de alto nivel que
  * reemplacen el trabajo algoritmico que se pide implementar.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public final class ListaStopwords {
 

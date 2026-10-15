@@ -23,7 +23,7 @@ import java.util.Set;
  * de 20 abstracts para que los pesos sean comparables entre cualquier par
  * de articulos que el usuario seleccione en la aplicacion.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class TfIdfVectorizador {
 

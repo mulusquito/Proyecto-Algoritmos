@@ -17,7 +17,7 @@ package co.edu.uniquindio.bibliometria.ordenamiento;
  * frecuencia maxima k (d = floor(log10 k) + 1) y b = 10. Como d y b son
  * constantes pequenas para un corpus dado, el costo es O(n).
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class RadixSort implements AlgoritmoOrdenamiento {
 

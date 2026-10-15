@@ -7,7 +7,7 @@ package co.edu.uniquindio.bibliometria.clustering;
  * <pre> d(I∪J, M) = max( d(I,M), d(J,M) ) </pre>
  * Tiende a formar clusteres compactos y de tamano similar.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class EnlaceCompleto implements EstrategiaEnlace {
 

@@ -18,7 +18,7 @@ import java.util.Map;
  * (similitud = 1); dos documentos sin ningun termino en comun producen un
  * angulo de 90 grados (similitud = 0).
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class CosenoTfIdfSimilitud {
 

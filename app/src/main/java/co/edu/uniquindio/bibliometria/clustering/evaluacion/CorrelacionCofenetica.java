@@ -27,7 +27,7 @@ import java.util.Map;
  * desde cero (recorrido del arbol + calculo manual de la correlacion de
  * Pearson), sin usar Apache Commons Math ni ninguna libreria estadistica.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class CorrelacionCofenetica {
 

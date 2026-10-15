@@ -22,7 +22,7 @@ import java.util.Map;
  * empates de frecuencia se resuelven siempre igual: primero el termino que
  * aparecio antes en el corpus.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public final class ContadorFrecuencias {
 

@@ -21,7 +21,7 @@ import java.util.List;
  * caracter, usado por Levenshtein y Needleman-Wunsch, que comparan cadenas
  * completas y no bolsas de palabras).
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public final class Preprocesador {
 

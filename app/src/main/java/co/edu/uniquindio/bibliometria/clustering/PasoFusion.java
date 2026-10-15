@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /** Registra una fusion de dos clusteres durante el algoritmo aglomerativo (una fila del "linkage matrix" clasico).  *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class PasoFusion {
     public final int clusterA;

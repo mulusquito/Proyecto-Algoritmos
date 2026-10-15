@@ -12,7 +12,7 @@ import java.util.Map;
  * "altura" (la distancia a la que se fusionaron, segun el criterio de
  * enlace usado).
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class NodoDendrograma {
 

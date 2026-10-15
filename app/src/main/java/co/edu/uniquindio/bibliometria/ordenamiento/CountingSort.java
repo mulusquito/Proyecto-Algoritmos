@@ -18,7 +18,7 @@ package co.edu.uniquindio.bibliometria.ordenamiento;
  * Complejidad: O(n + k) en tiempo y O(n + k) en espacio, donde n es el
  * numero de terminos y k la frecuencia maxima.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class CountingSort implements AlgoritmoOrdenamiento {
 

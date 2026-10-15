@@ -18,7 +18,7 @@ import java.util.Map;
  * subconjunto de JSON necesario para este proyecto: objetos, arreglos,
  * cadenas (con escapes basicos), numeros, booleanos y null.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public final class JsonParser {
 

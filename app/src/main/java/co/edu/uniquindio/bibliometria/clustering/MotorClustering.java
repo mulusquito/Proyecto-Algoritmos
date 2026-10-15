@@ -17,7 +17,7 @@ import java.util.Map;
  * correlacion cofenetica para determinar cual produce el agrupamiento mas
  * coherente.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class MotorClustering {
 

@@ -25,7 +25,7 @@ import java.util.Optional;
  * La lectura del JSON usa el parser propio {@link JsonParser} (ver esa
  * clase para la justificacion de por que no se usa Jackson/Gson).
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class RepositorioArticulos {
 
