@@ -11,11 +11,13 @@ package co.edu.uniquindio.bibliometria.clustering;
 */
 public class EnlaceCompleto implements EstrategiaEnlace {
 
+    /** Distancia al nuevo cluster = la mayor de las dos distancias previas (los tamanos no influyen). */
     @Override
     public double distanciaFusion(double distanciaIM, double distanciaJM, int tamanoI, int tamanoJ, int tamanoM) {
         return Math.max(distanciaIM, distanciaJM);
     }
 
+    /** @return nombre del criterio para mostrar en la interfaz */
     @Override
     public String getNombre() {
         return "Complete Linkage (enlace completo)";

@@ -33,15 +33,21 @@ public class ClusteringJerarquico {
      * @param etiquetas   etiqueta legible de cada elemento (mismo orden que la matriz)
      * @param idsOriginales id de articulo correspondiente a cada fila/columna
      * @param estrategia  criterio de enlace (single/complete/average)
+     * @return dendrograma (raiz) y lista de las n-1 fusiones realizadas
      */
     public ResultadoClustering ejecutar(double[][] distancias, List<String> etiquetas,
                                          List<Integer> idsOriginales, EstrategiaEnlace estrategia) {
         int n = distancias.length;
 
+        // Estado del algoritmo, indexado por id de cluster:
+        //  - nodos:   subarbol del dendrograma que representa cada cluster
+        //  - tamanos: numero de articulos originales en cada cluster
+        //  - dist:    distancia entre cada par de clusteres activos (dist.get(a).get(b))
         Map<Integer, NodoDendrograma> nodos = new HashMap<>();
         Map<Integer, Integer> tamanos = new HashMap<>();
         Map<Integer, Map<Integer, Double>> dist = new HashMap<>();
 
+        // Inicio: cada articulo es un cluster de tamano 1 (una hoja).
         for (int i = 0; i < n; i++) {
             nodos.put(i, new NodoDendrograma(i, idsOriginales.get(i), etiquetas.get(i)));
             tamanos.put(i, 1);
@@ -55,11 +61,15 @@ public class ClusteringJerarquico {
         }
 
         List<PasoFusion> pasos = new ArrayList<>();
+        // Los clusteres nuevos reciben ids a partir de n para no chocar con las hojas.
         int siguienteId = n;
+        // Clusteres que todavia no se han fusionado con otro.
         List<Integer> activos = new ArrayList<>();
         for (int i = 0; i < n; i++) activos.add(i);
 
+        // Cada vuelta fusiona dos clusteres; termina cuando solo queda uno (n-1 vueltas).
         while (activos.size() > 1) {
+            // 1. Buscar el par de clusteres activos con la menor distancia.
             int mejorI = -1, mejorJ = -1;
             double mejorDistancia = Double.POSITIVE_INFINITY;
 
@@ -76,6 +86,7 @@ public class ClusteringJerarquico {
                 }
             }
 
+            // 2. Fusionarlos en un nuevo nodo cuya altura es la distancia a la que se unieron.
             int tamI = tamanos.get(mejorI);
             int tamJ = tamanos.get(mejorJ);
             NodoDendrograma nuevoNodo = new NodoDendrograma(siguienteId, mejorDistancia,
@@ -84,6 +95,8 @@ public class ClusteringJerarquico {
 
             pasos.add(new PasoFusion(mejorI, mejorJ, mejorDistancia, siguienteId, tamNuevo));
 
+            // 3. Distancia del nuevo cluster a cada cluster M restante, con la formula
+            //    de Lance-Williams del criterio de enlace elegido.
             Map<Integer, Double> filaNueva = new HashMap<>();
             for (int m : activos) {
                 if (m == mejorI || m == mejorJ) continue;
@@ -95,6 +108,7 @@ public class ClusteringJerarquico {
             }
             dist.put(siguienteId, filaNueva);
 
+            // 4. Actualizar el estado: salen I y J, entra el nuevo cluster.
             activos.remove(Integer.valueOf(mejorI));
             activos.remove(Integer.valueOf(mejorJ));
             activos.add(siguienteId);
@@ -111,6 +125,7 @@ public class ClusteringJerarquico {
             siguienteId++;
         }
 
+        // El unico cluster que queda contiene todos los articulos: es la raiz del dendrograma.
         NodoDendrograma raiz = nodos.get(activos.get(0));
         return new ResultadoClustering(estrategia.getNombre(), raiz, pasos);
     }

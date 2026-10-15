@@ -41,6 +41,7 @@ public final class ListaStopwords {
             "e.g", "et", "al", "study", "paper", "article", "review", "research"
     )));
 
+    /** Constructor privado: la clase solo expone la constante y no se instancia. */
     private ListaStopwords() {
     }
 }

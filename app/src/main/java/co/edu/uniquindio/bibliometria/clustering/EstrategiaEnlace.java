@@ -23,5 +23,6 @@ public interface EstrategiaEnlace {
      */
     double distanciaFusion(double distanciaIM, double distanciaJM, int tamanoI, int tamanoJ, int tamanoM);
 
+    /** @return nombre legible del criterio de enlace (se muestra en la interfaz y en el JSON) */
     String getNombre();
 }

@@ -21,8 +21,10 @@ import java.util.List;
 */
 public class CosenoEmbeddingSimilitud {
 
+    /** Nombre del algoritmo que se muestra en la interfaz. */
     public static final String NOMBRE = "Similitud del Coseno sobre Embeddings (IA)";
 
+    /** Convierte cada abstract en su vector promedio de embeddings. */
     private final VectorizadorEmbeddings vectorizador;
 
     /**
@@ -43,6 +45,7 @@ public class CosenoEmbeddingSimilitud {
         VectorDocumento va = vectorizador.vectorizar(tokensA);
         VectorDocumento vb = vectorizador.vectorizar(tokensB);
 
+        // Un solo recorrido de las 100 componentes calcula el producto punto y las dos normas.
         double productoPunto = 0.0;
         double normaA = 0.0;
         double normaB = 0.0;
@@ -55,6 +58,7 @@ public class CosenoEmbeddingSimilitud {
         normaB = Math.sqrt(normaB);
 
         double coseno = (normaA == 0 || normaB == 0) ? 0.0 : productoPunto / (normaA * normaB);
+        // Se recorta a [-1, 1] porque el redondeo puede dar 1.0000000001 y acos fallaria.
         coseno = Math.max(-1.0, Math.min(1.0, coseno));
 
         return new ResultadoSimilitud(NOMBRE, "ia", coseno)

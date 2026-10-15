@@ -16,12 +16,18 @@ import java.util.Map;
 */
 public class NodoDendrograma {
 
+    /** Identificador del nodo (las hojas usan 0..n-1 y los nodos internos n, n+1, ...). */
     private final int id;
+    /** true si el nodo representa un solo articulo; false si es una fusion. */
     private final boolean esHoja;
     private final Integer articuloId; // solo para hojas
+    /** Texto que se muestra debajo de la hoja en el dendrograma (solo hojas). */
     private final String etiqueta;
+    /** Distancia a la que se fusionaron los dos hijos (0 para las hojas). */
     private final double altura;
+    /** Subarbol izquierdo (null en las hojas). */
     private final NodoDendrograma izquierdo;
+    /** Subarbol derecho (null en las hojas). */
     private final NodoDendrograma derecho;
     private final List<Integer> miembros = new ArrayList<>(); // ids de articulos contenidos en el subarbol
 
@@ -50,38 +56,47 @@ public class NodoDendrograma {
         this.miembros.addAll(derecho.miembros);
     }
 
+    /** @return identificador del nodo */
     public int getId() {
         return id;
     }
 
+    /** @return true si el nodo es una hoja (un solo articulo) */
     public boolean isEsHoja() {
         return esHoja;
     }
 
+    /** @return id del articulo de la hoja, o null si es un nodo interno */
     public Integer getArticuloId() {
         return articuloId;
     }
 
+    /** @return etiqueta de la hoja, o null si es un nodo interno */
     public String getEtiqueta() {
         return etiqueta;
     }
 
+    /** @return distancia a la que se fusionaron los hijos (0 en las hojas) */
     public double getAltura() {
         return altura;
     }
 
+    /** @return subarbol izquierdo, o null si es una hoja */
     public NodoDendrograma getIzquierdo() {
         return izquierdo;
     }
 
+    /** @return subarbol derecho, o null si es una hoja */
     public NodoDendrograma getDerecho() {
         return derecho;
     }
 
+    /** @return ids de todos los articulos que cuelgan de este nodo */
     public List<Integer> getMiembros() {
         return miembros;
     }
 
+    /** @return numero de articulos que agrupa este nodo */
     public int tamano() {
         return miembros.size();
     }

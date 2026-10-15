@@ -26,6 +26,7 @@ import java.util.TreeSet;
 */
 public class JaccardSimilitud {
 
+    /** Nombre del algoritmo que se muestra en la interfaz. */
     public static final String NOMBRE = "Coeficiente de Jaccard";
 
     /**
@@ -39,12 +40,15 @@ public class JaccardSimilitud {
         List<String> tokensA = Preprocesador.procesarParaVectorial(abstractA);
         List<String> tokensB = Preprocesador.procesarParaVectorial(abstractB);
 
+        // Al pasar a conjunto se descartan las repeticiones: solo importa si la palabra esta o no.
         Set<String> conjuntoA = new HashSet<>(tokensA);
         Set<String> conjuntoB = new HashSet<>(tokensB);
 
+        // Interseccion: palabras presentes en ambos (TreeSet para listarlas en orden alfabetico).
         Set<String> interseccion = new TreeSet<>(conjuntoA);
         interseccion.retainAll(conjuntoB);
 
+        // Union: palabras presentes en al menos uno de los dos.
         Set<String> union = new HashSet<>(conjuntoA);
         union.addAll(conjuntoB);
 

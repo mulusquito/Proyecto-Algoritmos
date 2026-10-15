@@ -27,15 +27,26 @@ import java.util.Map;
 */
 public class RepositorioEmbeddings {
 
+    /** Ruta, dentro de los recursos de la aplicacion, del archivo de vectores. */
     private static final String RECURSO = "/embeddings/glove100_filtrado.tsv";
+    /** Numero de componentes de cada vector de palabra (GloVe 100d). */
     public static final int DIMENSIONES = 100;
 
+    /** Vector de cada palabra del vocabulario. */
     private final Map<String, double[]> vectores = new HashMap<>();
 
+    /** Crea el repositorio y carga de inmediato todos los vectores en memoria. */
     public RepositorioEmbeddings() {
         cargar();
     }
 
+    /**
+     * Lee el archivo de vectores linea por linea. Cada linea tiene el formato
+     * {@code palabra<TAB>v1 v2 ... v100}: se separa la palabra de los numeros
+     * y estos se convierten a un arreglo de doubles.
+     *
+     * @throws IllegalStateException si el archivo no existe o no se puede leer
+     */
     private void cargar() {
         try (InputStream is = RepositorioEmbeddings.class.getResourceAsStream(RECURSO)) {
             if (is == null) {
@@ -60,14 +71,17 @@ public class RepositorioEmbeddings {
         }
     }
 
+    /** @return el vector de la palabra, o null si no esta en el vocabulario */
     public double[] obtenerVector(String palabra) {
         return vectores.get(palabra);
     }
 
+    /** @return true si la palabra tiene vector en el modelo */
     public boolean contiene(String palabra) {
         return vectores.containsKey(palabra);
     }
 
+    /** @return numero de palabras cargadas */
     public int tamano() {
         return vectores.size();
     }

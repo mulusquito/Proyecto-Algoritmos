@@ -24,8 +24,10 @@ import java.util.List;
 */
 public class EuclidianaEmbeddingSimilitud {
 
+    /** Nombre del algoritmo que se muestra en la interfaz. */
     public static final String NOMBRE = "Distancia Euclidiana sobre Embeddings (IA)";
 
+    /** Convierte cada abstract en su vector promedio de embeddings. */
     private final VectorizadorEmbeddings vectorizador;
 
     /**
@@ -46,12 +48,14 @@ public class EuclidianaEmbeddingSimilitud {
         VectorDocumento va = vectorizador.vectorizar(tokensA);
         VectorDocumento vb = vectorizador.vectorizar(tokensB);
 
+        // Distancia euclidiana: raiz de la suma de las diferencias al cuadrado en cada componente.
         double sumaCuadrados = 0.0;
         for (int i = 0; i < va.vector.length; i++) {
             double diferencia = va.vector[i] - vb.vector[i];
             sumaCuadrados += diferencia * diferencia;
         }
         double distancia = Math.sqrt(sumaCuadrados);
+        // Conversion a similitud: distancia 0 -> 1, y tiende a 0 cuando la distancia crece.
         double similitud = 1.0 / (1.0 + distancia);
 
         return new ResultadoSimilitud(NOMBRE, "ia", similitud)

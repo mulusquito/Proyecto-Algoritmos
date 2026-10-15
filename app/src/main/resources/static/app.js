@@ -3,11 +3,13 @@
 // Consume la API REST implementada en co.edu.uniquindio.bibliometria.web.
 // ============================================================
 
-let ARTICULOS = [];
-let CLUSTERING_RESPUESTA = null;
-let CLUSTER_ACTUAL = 0;
-let RANKING_CARGADO = false;
+// Estado global de la pagina:
+let ARTICULOS = [];               // los 20 articulos recibidos de /api/articulos
+let CLUSTERING_RESPUESTA = null;  // respuesta de /api/clustering (null hasta que se pide)
+let CLUSTER_ACTUAL = 0;           // dendrograma visible: 0 Single, 1 Complete, 2 Average
+let RANKING_CARGADO = false;      // si ya se midio el ranking al menos una vez
 
+// Al terminar de cargar el HTML: activar pestanas y botones, y traer el corpus.
 document.addEventListener("DOMContentLoaded", () => {
     configurarTabs();
     configurarTabsClustering();
@@ -19,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // ------------------------------------------------------------
 // Navegacion por pestanas
 // ------------------------------------------------------------
+// Activa la navegacion entre pestanas principales. La primera vez que se abre Clustering o Ranking se piden sus datos al servidor (carga perezosa).
 function configurarTabs() {
     document.querySelectorAll(".tab-btn").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -36,6 +39,7 @@ function configurarTabs() {
     });
 }
 
+// Botones Single / Complete / Average: cambian el dendrograma que se dibuja sin volver a pedir datos.
 function configurarTabsClustering() {
     document.querySelectorAll(".cluster-tab-btn").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -50,6 +54,7 @@ function configurarTabsClustering() {
 // ------------------------------------------------------------
 // Corpus de articulos
 // ------------------------------------------------------------
+// Pide los 20 articulos a /api/articulos, arma la tabla del corpus y llena los selectores de similitud.
 async function cargarArticulos() {
     const respuesta = await fetch("/api/articulos");
     ARTICULOS = await respuesta.json();
@@ -57,6 +62,7 @@ async function cargarArticulos() {
     poblarSelectores();
 }
 
+// Dibuja la tabla del corpus; cada articulo tiene una fila oculta con su abstract.
 function renderizarTablaArticulos() {
     const contenedor = document.getElementById("tabla-articulos");
     let html = "<table><thead><tr><th>#</th><th>Título</th><th>Autores</th><th></th></tr></thead><tbody>";
@@ -75,11 +81,13 @@ function renderizarTablaArticulos() {
     contenedor.innerHTML = html;
 }
 
+// Muestra u oculta el abstract de un articulo en la tabla del corpus.
 function alternarAbstract(id) {
     const fila = document.getElementById("abstract-" + id);
     fila.style.display = fila.style.display === "none" ? "table-row" : "none";
 }
 
+// Llena los dos selectores de articulos (A y B); B arranca en el segundo articulo para que no sean iguales.
 function poblarSelectores() {
     const selectA = document.getElementById("select-articulo-a");
     const selectB = document.getElementById("select-articulo-b");
@@ -92,6 +100,7 @@ function poblarSelectores() {
 // ------------------------------------------------------------
 // Requerimiento 1: Similitud
 // ------------------------------------------------------------
+// Lee los dos articulos elegidos, valida que sean distintos y pide los 6 resultados a /api/similitud.
 async function ejecutarComparacion() {
     const idA = document.getElementById("select-articulo-a").value;
     const idB = document.getElementById("select-articulo-b").value;
@@ -112,6 +121,7 @@ async function ejecutarComparacion() {
     renderizarResultadosSimilitud(datos);
 }
 
+// Dibuja una tarjeta por algoritmo con su puntaje, una barra proporcional y el detalle del calculo.
 function renderizarResultadosSimilitud(datos) {
     const contenedor = document.getElementById("resultado-similitud");
     let html = `<p><strong>A:</strong> ${escaparHtml(datos.articuloA.titulo)} &nbsp;&nbsp;
@@ -135,6 +145,7 @@ function renderizarResultadosSimilitud(datos) {
     contenedor.innerHTML = html;
 }
 
+// Convierte el objeto "detalle" de un resultado en una tabla clave / valor.
 function renderizarDetalle(detalle) {
     let filas = "";
     for (const [clave, valor] of Object.entries(detalle)) {
@@ -143,6 +154,7 @@ function renderizarDetalle(detalle) {
     return `<table class="detalle-tabla">${filas}</table>`;
 }
 
+// Da formato legible a un valor del detalle: decimales a 5 cifras, listas separadas por comas y objetos como lineas clave: valor.
 function formatearValorDetalle(valor) {
     if (valor === null || valor === undefined) return "-";
     if (typeof valor === "number") return Number.isInteger(valor) ? valor : valor.toFixed(5);
@@ -158,6 +170,7 @@ function formatearValorDetalle(valor) {
 // ------------------------------------------------------------
 // Requerimiento 2: Clustering / Dendrograma
 // ------------------------------------------------------------
+// Pide los 3 dendrogramas a /api/clustering y muestra la tabla de correlacion y el dendrograma elegido.
 async function cargarClustering() {
     const resumen = document.getElementById("resumen-clustering");
     resumen.innerHTML = `<p class="cargando">Calculando los 3 algoritmos de clustering...</p>`;
@@ -167,6 +180,7 @@ async function cargarClustering() {
     dibujarDendrogramaActual();
 }
 
+// Tabla con la correlacion cofenetica de cada criterio, marcando el mas coherente.
 function renderizarResumenClustering() {
     const resumen = document.getElementById("resumen-clustering");
     let filas = "";
@@ -186,6 +200,7 @@ function renderizarResumenClustering() {
         </table>`;
 }
 
+// Dibuja el dendrograma del criterio seleccionado (Single, Complete o Average).
 function dibujarDendrogramaActual() {
     const contenedor = document.getElementById("contenedor-dendrograma");
     if (!CLUSTERING_RESPUESTA) return;
@@ -194,6 +209,7 @@ function dibujarDendrogramaActual() {
     contenedor.appendChild(construirSvgDendrograma(resultado.dendrograma));
 }
 
+// Construye el dibujo SVG de un dendrograma: las hojas se reparten de izquierda a derecha, cada fusion se dibuja a una altura proporcional a su distancia y se une con lineas en forma de U.
 function construirSvgDendrograma(raiz) {
     const espacioX = 55;
     const margenIzq = 30;
@@ -203,6 +219,7 @@ function construirSvgDendrograma(raiz) {
     const espacioEtiquetas = 130;
 
     let siguienteIndice = 0;
+    // Recorre el arbol en orden y asigna la coordenada x: las hojas en columnas consecutivas y cada nodo interno en el punto medio de sus hijos.
     function asignarPosicionesHoja(nodo) {
         if (nodo.esHoja) {
             nodo._x = margenIzq + siguienteIndice * espacioX;
@@ -216,6 +233,7 @@ function construirSvgDendrograma(raiz) {
     asignarPosicionesHoja(raiz);
 
     const alturaMaxima = raiz.altura || 1;
+    // Convierte una altura (distancia) en coordenada vertical: altura 0 abajo, altura maxima arriba.
     function y(altura) {
         return margenSup + alturaPlot * (1 - altura / alturaMaxima);
     }
@@ -230,6 +248,7 @@ function construirSvgDendrograma(raiz) {
     svg.setAttribute("height", alto);
     svg.setAttribute("viewBox", `0 0 ${ancho} ${alto}`);
 
+    // Agrega una linea recta al SVG.
     function linea(x1, y1, x2, y2) {
         const l = document.createElementNS(NS, "line");
         l.setAttribute("x1", x1); l.setAttribute("y1", y1);
@@ -238,6 +257,7 @@ function construirSvgDendrograma(raiz) {
         svg.appendChild(l);
     }
 
+    // Dibuja recursivamente un nodo: las hojas con su etiqueta girada y un punto; los nodos internos con dos lineas verticales y una horizontal que une a sus hijos.
     function dibujar(nodo) {
         if (nodo.esHoja) {
             const texto = document.createElementNS(NS, "text");
@@ -275,6 +295,7 @@ function construirSvgDendrograma(raiz) {
 // ------------------------------------------------------------
 // Seguimiento: Ranking de terminos (Counting, Radix y Bucket Sort)
 // ------------------------------------------------------------
+// Pide a /api/ranking el top 15 con el numero de repeticiones elegido y muestra los resultados.
 async function cargarRanking() {
     const resumen = document.getElementById("resumen-ranking");
     const repeticiones = document.getElementById("select-repeticiones").value;
@@ -289,6 +310,7 @@ async function cargarRanking() {
     renderizarRanking(datos);
 }
 
+// Dibuja el resumen del corpus (n, k, d, cubetas), la tabla de tiempos y los tres top 15 lado a lado.
 function renderizarRanking(datos) {
     const c = datos.corpus;
     const resumen = document.getElementById("resumen-ranking");
@@ -346,6 +368,7 @@ function renderizarRanking(datos) {
 // ------------------------------------------------------------
 // Utilidades
 // ------------------------------------------------------------
+// Reemplaza los caracteres especiales de HTML para mostrar texto sin que el navegador lo interprete como codigo.
 function escaparHtml(texto) {
     if (texto === null || texto === undefined) return "";
     return String(texto)
@@ -355,6 +378,7 @@ function escaparHtml(texto) {
         .replace(/"/g, "&quot;");
 }
 
+// Recorta un texto a n caracteres, agregando puntos suspensivos si era mas largo.
 function acortar(texto, n) {
     return texto.length > n ? texto.substring(0, n - 1) + "…" : texto;
 }

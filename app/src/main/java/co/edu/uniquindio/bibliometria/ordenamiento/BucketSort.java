@@ -31,26 +31,33 @@ import java.util.List;
 */
 public class BucketSort implements AlgoritmoOrdenamiento {
 
+    /** Nombre del algoritmo que se muestra en la interfaz. */
     public static final String NOMBRE = "Bucket Sort";
 
+    /** @return nombre del algoritmo */
     @Override
     public String getNombre() {
         return NOMBRE;
     }
 
+    /** @return complejidad teorica, para mostrarla en la tabla de tiempos */
     @Override
     public String getComplejidad() {
         return "O(n + m) esperado";
     }
 
+    /** Ordena de mayor a menor frecuencia: distribuir, ordenar cada cubeta y concatenar. */
     @Override
     public TerminoFrecuencia[] ordenarDescendente(TerminoFrecuencia[] entrada) {
         int n = entrada.length;
         TerminoFrecuencia[] salida = new TerminoFrecuencia[n];
         if (n == 0) return salida;
 
+        // 1. Repartir los elementos en cubetas segun su frecuencia.
         List<List<TerminoFrecuencia>> cubetas = distribuir(entrada);
 
+        // 2 y 3. Recorrer las cubetas de la mayor a la menor, ordenar cada una
+        //        y copiar sus elementos a la salida.
         int pos = 0;
         for (int i = cubetas.size() - 1; i >= 0; i--) {
             List<TerminoFrecuencia> cubeta = cubetas.get(i);
@@ -69,6 +76,7 @@ public class BucketSort implements AlgoritmoOrdenamiento {
      */
     public List<List<TerminoFrecuencia>> distribuir(TerminoFrecuencia[] entrada) {
         int n = entrada.length;
+        // Rango de frecuencias [min, max] que hay que repartir entre las cubetas.
         int min = Integer.MAX_VALUE;
         int max = Integer.MIN_VALUE;
         for (TerminoFrecuencia t : entrada) {
@@ -76,11 +84,14 @@ public class BucketSort implements AlgoritmoOrdenamiento {
             if (t.getFrecuencia() > max) max = t.getFrecuencia();
         }
 
+        // Se crean m = n cubetas vacias, como en la version clasica del algoritmo.
         int m = n;
         long rango = (long) max - min + 1;
         List<List<TerminoFrecuencia>> cubetas = new ArrayList<>(m);
         for (int i = 0; i < m; i++) cubetas.add(new ArrayList<>());
 
+        // Cada elemento va a la cubeta que le corresponde por su frecuencia (se usa long
+        // en la multiplicacion para evitar desbordamiento con valores grandes).
         for (TerminoFrecuencia t : entrada) {
             int indice = (int) ((t.getFrecuencia() - min) * (long) m / rango);
             cubetas.get(indice).add(t);

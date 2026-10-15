@@ -14,11 +14,18 @@ package co.edu.uniquindio.bibliometria.clustering;
 */
 public class EnlacePromedio implements EstrategiaEnlace {
 
+    /**
+     * Distancia al nuevo cluster = promedio de las dos distancias previas,
+     * ponderado por el tamano de I y de J. Asi el resultado es el promedio
+     * de las distancias entre todos los pares de articulos (uno de I u J y
+     * otro de M).
+     */
     @Override
     public double distanciaFusion(double distanciaIM, double distanciaJM, int tamanoI, int tamanoJ, int tamanoM) {
         return (tamanoI * distanciaIM + tamanoJ * distanciaJM) / (double) (tamanoI + tamanoJ);
     }
 
+    /** @return nombre del criterio para mostrar en la interfaz */
     @Override
     public String getNombre() {
         return "Average Linkage (enlace promedio, UPGMA)";

@@ -22,24 +22,29 @@ package co.edu.uniquindio.bibliometria.ordenamiento;
 */
 public class CountingSort implements AlgoritmoOrdenamiento {
 
+    /** Nombre del algoritmo que se muestra en la interfaz. */
     public static final String NOMBRE = "Counting Sort";
 
+    /** @return nombre del algoritmo */
     @Override
     public String getNombre() {
         return NOMBRE;
     }
 
+    /** @return complejidad teorica, para mostrarla en la tabla de tiempos */
     @Override
     public String getComplejidad() {
         return "O(n + k)";
     }
 
+    /** Ordena de mayor a menor frecuencia en los 3 pasos descritos arriba. */
     @Override
     public TerminoFrecuencia[] ordenarDescendente(TerminoFrecuencia[] entrada) {
         int n = entrada.length;
         TerminoFrecuencia[] salida = new TerminoFrecuencia[n];
         if (n == 0) return salida;
 
+        // k = frecuencia maxima; define el tamano del arreglo de conteo.
         int k = 0;
         for (TerminoFrecuencia t : entrada) {
             if (t.getFrecuencia() > k) k = t.getFrecuencia();

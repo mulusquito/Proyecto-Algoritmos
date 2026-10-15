@@ -19,17 +19,24 @@ import java.util.List;
 */
 public class VectorizadorEmbeddings {
 
+    /** Modelo de donde se obtiene el vector de cada palabra. */
     private final RepositorioEmbeddings repositorio;
 
+    /** @param repositorio modelo de embeddings ya cargado */
     public VectorizadorEmbeddings(RepositorioEmbeddings repositorio) {
         this.repositorio = repositorio;
     }
 
+    /** Vector de un documento completo junto con su cobertura de vocabulario. */
     public static class VectorDocumento {
+        /** Promedio de los vectores de las palabras encontradas (100 componentes). */
         public final double[] vector;
+        /** Cuantas palabras del documento tenian vector en el modelo. */
         public final int palabrasEncontradas;
+        /** Cuantas palabras tenia el documento en total. */
         public final int palabrasTotales;
 
+        /** Agrupa el vector y las dos cifras de cobertura. */
         VectorDocumento(double[] vector, int encontradas, int totales) {
             this.vector = vector;
             this.palabrasEncontradas = encontradas;
@@ -44,10 +51,12 @@ public class VectorizadorEmbeddings {
      * @return vector promedio junto con estadisticas de cobertura (palabras encontradas / totales)
      */
     public VectorDocumento vectorizar(List<String> tokens) {
+        // 1. Sumar componente a componente los vectores de las palabras que existen en el modelo.
         double[] suma = new double[RepositorioEmbeddings.DIMENSIONES];
         int encontradas = 0;
         for (String token : tokens) {
             double[] v = repositorio.obtenerVector(token);
+            // Las palabras que no estan en el modelo se ignoran.
             if (v != null) {
                 for (int i = 0; i < suma.length; i++) {
                     suma[i] += v[i];
@@ -55,6 +64,8 @@ public class VectorizadorEmbeddings {
                 encontradas++;
             }
         }
+        // 2. Dividir entre el numero de palabras encontradas para obtener el promedio
+        //    (si no se encontro ninguna, queda el vector cero).
         if (encontradas > 0) {
             for (int i = 0; i < suma.length; i++) {
                 suma[i] /= encontradas;

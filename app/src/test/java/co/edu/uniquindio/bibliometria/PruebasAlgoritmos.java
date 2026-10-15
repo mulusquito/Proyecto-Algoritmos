@@ -40,9 +40,12 @@ import java.util.Map;
  */
 public class PruebasAlgoritmos {
 
+    /** Numero de aserciones ejecutadas. */
     private static int total = 0;
+    /** Numero de aserciones que fallaron. */
     private static int fallidas = 0;
 
+    /** Ejecuta todas las pruebas, imprime el resumen y termina con codigo 1 si alguna fallo. */
     public static void main(String[] args) {
         probarStemmer();
         probarLevenshtein();
@@ -59,6 +62,7 @@ public class PruebasAlgoritmos {
         }
     }
 
+    /** Verifica el stemmer con palabras cuya raiz de Porter es conocida. */
     private static void probarStemmer() {
         seccion("Stemmer (Porter simplificado)");
         afirmarIgual("learning -> learn", "learn", Stemmer.stem("learning"));
@@ -68,6 +72,7 @@ public class PruebasAlgoritmos {
         afirmarIgual("happy -> happi", "happi", Stemmer.stem("happy"));
     }
 
+    /** Verifica Levenshtein con el caso clasico kitten/sitting, cadenas iguales y cadenas sin letras comunes. */
     private static void probarLevenshtein() {
         seccion("Levenshtein");
         LevenshteinSimilitud algoritmo = new LevenshteinSimilitud();
@@ -85,6 +90,7 @@ public class PruebasAlgoritmos {
         afirmarIgual("distancia(aaaa, bbbb) = 4", 4, m2[4][4]);
     }
 
+    /** Verifica Needleman-Wunsch: un alineamiento identico debe dar el puntaje maximo y similitud 1. */
     private static void probarNeedlemanWunsch() {
         seccion("Needleman-Wunsch");
         NeedlemanWunschSimilitud algoritmo = new NeedlemanWunschSimilitud();
@@ -98,6 +104,7 @@ public class PruebasAlgoritmos {
         afirmarIgual("similitud(x, x) = 1.0", 1.0, sim, 1e-9);
     }
 
+    /** Verifica Jaccard: 1 para textos iguales y 0 para textos sin palabras en comun. */
     private static void probarJaccard() {
         seccion("Jaccard");
         JaccardSimilitud jaccard = new JaccardSimilitud();
@@ -111,6 +118,7 @@ public class PruebasAlgoritmos {
         afirmarIgual("J(disjuntos) = 0.0", 0.0, sim2, 1e-9);
     }
 
+    /** Verifica el coseno TF-IDF: 1 de un vector consigo mismo y 0 contra un vector vacio. */
     private static void probarTfIdfCoseno() {
         seccion("TF-IDF + Similitud del Coseno");
         List<List<String>> corpus = new ArrayList<>();
@@ -128,6 +136,7 @@ public class PruebasAlgoritmos {
         afirmarIgual("cos(v, 0) = 0.0", 0.0, simVacio, 1e-9);
     }
 
+    /** Verifica el clustering y la correlacion cofenetica con 4 puntos formados por dos pares bien separados. */
     private static void probarClusteringYCofenetica() {
         seccion("Clustering jerarquico + correlacion cofenetica");
         // 4 puntos en linea: dos pares claramente mas cercanos entre si (0,1) y (2,3)
@@ -158,6 +167,11 @@ public class PruebasAlgoritmos {
         afirmar("correlacion cofenetica alta (>0.9) para estructura clara", correlacion > 0.9);
     }
 
+    /**
+     * Verifica Counting, Radix y Bucket Sort: orden descendente y estable,
+     * arreglo vacio, entrada intacta, 5000 claves aleatorias contra un
+     * oraculo y coincidencia de los tres sobre el corpus real.
+     */
     private static void probarOrdenamientosNoComparativos() {
         seccion("Ordenamiento no comparativo (Counting, Radix, Bucket)");
         List<AlgoritmoOrdenamiento> algoritmos = List.of(new CountingSort(), new RadixSort(), new BucketSort());
@@ -206,10 +220,12 @@ public class PruebasAlgoritmos {
     }
 
     // -----------------------------------------------------------------
+    /** Imprime un titulo para agrupar las pruebas de un mismo algoritmo en la consola. */
     private static void seccion(String nombre) {
         System.out.println("\n== " + nombre + " ==");
     }
 
+    /** Cuenta una prueba e imprime [OK] si esperado y obtenido son iguales, o [FALLO] con ambos valores. */
     private static void afirmarIgual(String descripcion, Object esperado, Object obtenido) {
         total++;
         if (java.util.Objects.equals(esperado, obtenido)) {
@@ -220,6 +236,7 @@ public class PruebasAlgoritmos {
         }
     }
 
+    /** Version para decimales: acepta diferencias de hasta {@code tolerancia} por errores de redondeo. */
     private static void afirmarIgual(String descripcion, double esperado, double obtenido, double tolerancia) {
         total++;
         if (Math.abs(esperado - obtenido) <= tolerancia) {
@@ -230,6 +247,7 @@ public class PruebasAlgoritmos {
         }
     }
 
+    /** Cuenta una prueba e imprime [OK] si la condicion es verdadera, o [FALLO] si no. */
     private static void afirmar(String descripcion, boolean condicion) {
         total++;
         if (condicion) {
