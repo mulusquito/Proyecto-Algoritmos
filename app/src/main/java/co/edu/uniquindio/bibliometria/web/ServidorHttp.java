@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  *     <li>Archivos estaticos del frontend (carpeta {@code static/})</li>
  * </ul>
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class ServidorHttp {
 

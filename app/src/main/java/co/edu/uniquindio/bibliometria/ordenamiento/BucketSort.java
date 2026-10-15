@@ -27,7 +27,7 @@ import java.util.List;
  * cubre un unico valor de frecuencia, la Insercion no realiza
  * desplazamientos y el costo es O(n + m) = O(n) (ver documento tecnico).
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class BucketSort implements AlgoritmoOrdenamiento {
 

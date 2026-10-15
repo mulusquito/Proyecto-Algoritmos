@@ -13,7 +13,7 @@ package co.edu.uniquindio.bibliometria.texto;
  * medida silabica (m), deteccion de vocales y sufijos se implementan de
  * forma explicita con operaciones basicas sobre {@code char[]}.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public final class Stemmer {
 

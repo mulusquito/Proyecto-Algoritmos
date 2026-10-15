@@ -11,7 +11,7 @@ import java.util.Map;
  * tiempo en milisegundos, el top N de terminos obtenido y si el arreglo
  * completo quedo correctamente ordenado.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class ResultadoOrdenamiento {
 

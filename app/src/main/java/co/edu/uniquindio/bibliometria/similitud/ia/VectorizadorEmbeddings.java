@@ -15,7 +15,7 @@ import java.util.List;
  * aritmeticas basicas sobre arreglos, sin usar ninguna libreria de
  * algebra lineal.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class VectorizadorEmbeddings {
 

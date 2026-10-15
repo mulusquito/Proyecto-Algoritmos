@@ -20,7 +20,7 @@ import co.edu.uniquindio.bibliometria.web.ServidorHttp;
  * proyecto y evita depender de Spring Boot (ver {@link ServidorHttp} para
  * la justificacion completa).
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class BibliometriaApplication {
 

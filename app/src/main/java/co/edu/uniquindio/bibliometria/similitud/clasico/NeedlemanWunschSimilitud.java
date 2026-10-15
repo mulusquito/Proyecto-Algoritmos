@@ -30,7 +30,7 @@ import java.util.List;
  * F[i][j] = max( F[i-1][j-1] + s(Ai,Bj), F[i-1][j] + gap, F[i][j-1] + gap )
  * </pre>
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class NeedlemanWunschSimilitud {
 

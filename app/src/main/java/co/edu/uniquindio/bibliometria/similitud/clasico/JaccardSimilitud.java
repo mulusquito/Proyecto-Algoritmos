@@ -22,7 +22,7 @@ import java.util.TreeSet;
  * vocabulario (sin importar la frecuencia ni el orden de las palabras); un
  * valor de 0 indica que no comparten ninguna palabra.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class JaccardSimilitud {
 

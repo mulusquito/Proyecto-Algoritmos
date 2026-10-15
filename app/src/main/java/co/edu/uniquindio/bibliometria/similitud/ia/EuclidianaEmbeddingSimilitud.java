@@ -20,7 +20,7 @@ import java.util.List;
  * en el detalle del resultado para el analisis critico solicitado por el
  * proyecto.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class EuclidianaEmbeddingSimilitud {
 

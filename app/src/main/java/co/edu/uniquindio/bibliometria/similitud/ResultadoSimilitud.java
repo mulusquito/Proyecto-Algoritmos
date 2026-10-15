@@ -11,7 +11,7 @@ import java.util.Map;
  * poder demostrar el funcionamiento algoritmico paso a paso, tal como lo
  * exige el requerimiento 1 del proyecto.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class ResultadoSimilitud {
 

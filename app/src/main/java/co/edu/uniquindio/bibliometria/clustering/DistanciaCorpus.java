@@ -18,7 +18,7 @@ import java.util.Map;
  * documenta explicitamente porque el enunciado permite research sobre
  * cualquier medida de similitud/distancia razonable para esta etapa.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class DistanciaCorpus {
 

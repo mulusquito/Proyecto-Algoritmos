@@ -27,7 +27,7 @@ import co.edu.uniquindio.bibliometria.texto.Preprocesador;
  * {@code 1 - distancia_normalizada} para que quede en el rango [0,1], igual
  * que el resto de algoritmos.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class LevenshteinSimilitud {
 

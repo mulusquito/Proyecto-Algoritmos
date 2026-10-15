@@ -9,7 +9,7 @@ import java.util.Objects;
  * autores son metadatos adicionales extraidos para trazabilidad y para
  * futuros requerimientos que crucen esta informacion.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class Articulo {
 

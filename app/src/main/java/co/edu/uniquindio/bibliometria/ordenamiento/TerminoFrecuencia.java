@@ -9,7 +9,7 @@ import java.util.Map;
  * termino es el dato "satelite" que viaja junto a su clave. Los algoritmos
  * de ordenamiento mueven el par completo, nunca solo el numero.
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public final class TerminoFrecuencia {
 

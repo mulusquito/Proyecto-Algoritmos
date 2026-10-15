@@ -20,7 +20,7 @@ import java.util.Map;
  * etc.): la busqueda del par minimo y la actualizacion de distancias se
  * hacen con estructuras basicas (mapas y bucles).
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class ClusteringJerarquico {
 

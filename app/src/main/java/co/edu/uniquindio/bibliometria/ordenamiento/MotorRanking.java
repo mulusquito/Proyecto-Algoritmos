@@ -22,7 +22,7 @@ import java.util.Map;
  * que ningun algoritmo se beneficie o se perjudique por el momento en que
  * corre (recolector de basura, otros procesos).
   *
- * @author Melissa Restrepo Henao - Universidad del Quindio
+ * @author Melissa Restrepo Hurtado - Universidad del Quindio
 */
 public class MotorRanking {
 
