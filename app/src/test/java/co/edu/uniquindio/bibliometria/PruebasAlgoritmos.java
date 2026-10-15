@@ -5,6 +5,14 @@ import co.edu.uniquindio.bibliometria.clustering.EnlaceSimple;
 import co.edu.uniquindio.bibliometria.clustering.EstrategiaEnlace;
 import co.edu.uniquindio.bibliometria.clustering.ResultadoClustering;
 import co.edu.uniquindio.bibliometria.clustering.evaluacion.CorrelacionCofenetica;
+import co.edu.uniquindio.bibliometria.datos.RepositorioArticulos;
+import co.edu.uniquindio.bibliometria.ordenamiento.AlgoritmoOrdenamiento;
+import co.edu.uniquindio.bibliometria.ordenamiento.BucketSort;
+import co.edu.uniquindio.bibliometria.ordenamiento.CountingSort;
+import co.edu.uniquindio.bibliometria.ordenamiento.MotorRanking;
+import co.edu.uniquindio.bibliometria.ordenamiento.RadixSort;
+import co.edu.uniquindio.bibliometria.ordenamiento.ResultadoOrdenamiento;
+import co.edu.uniquindio.bibliometria.ordenamiento.TerminoFrecuencia;
 import co.edu.uniquindio.bibliometria.similitud.clasico.JaccardSimilitud;
 import co.edu.uniquindio.bibliometria.similitud.clasico.LevenshteinSimilitud;
 import co.edu.uniquindio.bibliometria.similitud.clasico.NeedlemanWunschSimilitud;
@@ -42,6 +50,7 @@ public class PruebasAlgoritmos {
         probarJaccard();
         probarTfIdfCoseno();
         probarClusteringYCofenetica();
+        probarOrdenamientosNoComparativos();
 
         System.out.println();
         System.out.println(total + " pruebas ejecutadas, " + fallidas + " fallidas.");
@@ -147,6 +156,53 @@ public class PruebasAlgoritmos {
         double correlacion = evaluador.calcularCorrelacion(distancias, cofenetica);
         // Esta estructura de datos (2 pares muy separados) debe dar una correlacion alta
         afirmar("correlacion cofenetica alta (>0.9) para estructura clara", correlacion > 0.9);
+    }
+
+    private static void probarOrdenamientosNoComparativos() {
+        seccion("Ordenamiento no comparativo (Counting, Radix, Bucket)");
+        List<AlgoritmoOrdenamiento> algoritmos = List.of(new CountingSort(), new RadixSort(), new BucketSort());
+
+        // Caso pequeno con empates: el orden esperado respeta la estabilidad
+        // (a igual frecuencia, primero el que venia antes en la entrada).
+        TerminoFrecuencia[] entrada = {
+                new TerminoFrecuencia("ai", 5), new TerminoFrecuencia("data", 12),
+                new TerminoFrecuencia("model", 5), new TerminoFrecuencia("learning", 105),
+                new TerminoFrecuencia("ethics", 1), new TerminoFrecuencia("study", 12)
+        };
+        String esperado = "[learning=105, data=12, study=12, ai=5, model=5, ethics=1]";
+        for (AlgoritmoOrdenamiento algoritmo : algoritmos) {
+            afirmarIgual(algoritmo.getNombre() + ": orden descendente y estable", esperado,
+                    java.util.Arrays.toString(algoritmo.ordenarDescendente(entrada)));
+            afirmarIgual(algoritmo.getNombre() + ": arreglo vacio", 0,
+                    algoritmo.ordenarDescendente(new TerminoFrecuencia[0]).length);
+        }
+        afirmarIgual("la entrada no se modifica", "ai=5", entrada[0].toString());
+
+        // Caso aleatorio grande (distribucion sesgada como la de Zipf, con
+        // claves de 1 a 4 digitos) comparado contra un oraculo independiente.
+        java.util.Random aleatorio = new java.util.Random(42);
+        TerminoFrecuencia[] grande = new TerminoFrecuencia[5000];
+        for (int i = 0; i < grande.length; i++) {
+            int frecuencia = aleatorio.nextInt(10) < 7 ? 1 + aleatorio.nextInt(3) : aleatorio.nextInt(5000);
+            grande[i] = new TerminoFrecuencia("t" + i, frecuencia);
+        }
+        TerminoFrecuencia[] oraculo = grande.clone();
+        // Oraculo de prueba: ordenamiento estable de la libreria (solo en las pruebas).
+        java.util.Arrays.sort(oraculo, (x, y) -> Integer.compare(y.getFrecuencia(), x.getFrecuencia()));
+        for (AlgoritmoOrdenamiento algoritmo : algoritmos) {
+            afirmar(algoritmo.getNombre() + ": 5000 claves aleatorias = oraculo",
+                    MotorRanking.mismoOrden(oraculo, algoritmo.ordenarDescendente(grande)));
+        }
+
+        // Sobre el corpus real: los tres algoritmos deben coincidir en el ranking completo.
+        MotorRanking motor = new MotorRanking(new RepositorioArticulos());
+        List<ResultadoOrdenamiento> resultados = motor.ejecutar(15, 3);
+        for (ResultadoOrdenamiento r : resultados) {
+            afirmar(r.getAlgoritmo() + ": corpus ordenado descendentemente",
+                    MotorRanking.estaOrdenadoDescendente(r.getOrdenado()));
+            afirmar(r.getAlgoritmo() + ": mismo ranking que Counting Sort",
+                    MotorRanking.mismoOrden(resultados.get(0).getOrdenado(), r.getOrdenado()));
+        }
     }
 
     // -----------------------------------------------------------------

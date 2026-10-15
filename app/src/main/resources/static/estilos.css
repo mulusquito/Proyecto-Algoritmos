@@ -75,8 +75,8 @@ tr:hover { background: #eef3f8; }
 .selector-articulos { display: flex; gap: 16px; align-items: end; flex-wrap: wrap; margin: 16px 0; background: white; padding: 16px; border-radius: var(--radio); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 .selector-articulos label { display: flex; flex-direction: column; font-size: 0.85rem; font-weight: 600; gap: 4px; flex: 1; min-width: 260px; }
 select, button { font-size: 0.9rem; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--color-borde); }
-#btn-comparar { background: var(--color-acento); color: #3a2a08; border: none; font-weight: 700; cursor: pointer; height: 38px; }
-#btn-comparar:hover { filter: brightness(1.08); }
+#btn-comparar, #btn-medir { background: var(--color-acento); color: #3a2a08; border: none; font-weight: 700; cursor: pointer; height: 38px; }
+#btn-comparar:hover, #btn-medir:hover { filter: brightness(1.08); }
 
 .tarjetas-resultado { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 18px; }
 .tarjeta { background: white; border-radius: var(--radio); padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 5px solid var(--color-clasico); }
@@ -105,6 +105,17 @@ details summary { cursor: pointer; color: var(--color-secundario); }
 #contenedor-dendrograma svg { display: block; }
 .linea-dendro { stroke: var(--color-secundario); stroke-width: 1.6; fill: none; }
 .etiqueta-hoja { font-size: 9px; fill: #333; }
+
+#resumen-ranking { background: white; padding: 14px 18px; border-radius: var(--radio); box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-top: 12px; }
+#resultado-ranking h3 { color: var(--color-primario); margin-top: 28px; }
+.tablas-ranking { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.tabla-ranking h4 { margin: 8px 0 0 0; color: var(--color-secundario); }
+.tabla-ranking table { margin-top: 8px; font-size: 0.86rem; }
+.tabla-ranking td { padding: 5px 10px; }
+.celda-frecuencia { display: flex; align-items: center; gap: 8px; }
+.celda-frecuencia .barra-fondo { flex: 1; margin: 0; }
+.celda-frecuencia span { min-width: 22px; text-align: right; font-variant-numeric: tabular-nums; }
+.nota { font-size: 0.82rem; color: #666; }
 
 .cargando { color: #777; font-style: italic; padding: 20px 0; }
 footer { text-align: center; color: #777; font-size: 0.8rem; padding: 20px; }

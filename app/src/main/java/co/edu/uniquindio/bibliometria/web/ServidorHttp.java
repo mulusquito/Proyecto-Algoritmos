@@ -4,6 +4,7 @@ import co.edu.uniquindio.bibliometria.clustering.MotorClustering;
 import co.edu.uniquindio.bibliometria.clustering.ResultadoClustering;
 import co.edu.uniquindio.bibliometria.datos.RepositorioArticulos;
 import co.edu.uniquindio.bibliometria.model.Articulo;
+import co.edu.uniquindio.bibliometria.ordenamiento.MotorRanking;
 import co.edu.uniquindio.bibliometria.similitud.MotorSimilitud;
 import co.edu.uniquindio.bibliometria.similitud.ResultadoSimilitud;
 import co.edu.uniquindio.bibliometria.util.JsonEscritor;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
  *     <li>{@code GET /api/articulos} y {@code GET /api/articulos/{id}}</li>
  *     <li>{@code GET /api/similitud?idA=..&idB=..} (Requerimiento 1)</li>
  *     <li>{@code GET /api/clustering} (Requerimiento 2)</li>
+ *     <li>{@code GET /api/ranking?top=15&repeticiones=50} (Seguimiento: ranking de terminos)</li>
  *     <li>Archivos estaticos del frontend (carpeta {@code static/})</li>
  * </ul>
   *
@@ -53,18 +55,22 @@ public class ServidorHttp {
     private final RepositorioArticulos repositorioArticulos;
     private final MotorSimilitud motorSimilitud;
     private final MotorClustering motorClustering;
+    private final MotorRanking motorRanking;
 
     public ServidorHttp(int puerto, RepositorioArticulos repositorioArticulos,
-                         MotorSimilitud motorSimilitud, MotorClustering motorClustering) throws IOException {
+                         MotorSimilitud motorSimilitud, MotorClustering motorClustering,
+                         MotorRanking motorRanking) throws IOException {
         this.repositorioArticulos = repositorioArticulos;
         this.motorSimilitud = motorSimilitud;
         this.motorClustering = motorClustering;
+        this.motorRanking = motorRanking;
 
         this.servidor = HttpServer.create(new InetSocketAddress(puerto), 0);
         servidor.createContext("/api/articulos", conManejoDeErrores(this::manejarArticulos));
         servidor.createContext("/api/similitud", conManejoDeErrores(this::manejarSimilitud));
         servidor.createContext("/api/clustering", conManejoDeErrores(this::manejarClustering));
-        servidor.createContext("/", conManejoDeErrores(this::manejarEstatico));
+        servidor.createContext("/api/ranking", conManejoDeErrores(this::manejarRanking));
+        servidor.createContext("/",conManejoDeErrores(this::manejarEstatico));
         servidor.setExecutor(Executors.newFixedThreadPool(8));
     }
 
@@ -187,6 +193,26 @@ public class ServidorHttp {
         respuesta.put("algoritmoMasCoherente", mejor.getNombreEnlace());
         respuesta.put("correlacionCofeneticaMejor", mejor.getCorrelacionCofenetica());
         responderJson(exchange, 200, respuesta);
+    }
+
+    private void manejarRanking(HttpExchange exchange) throws IOException {
+        if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+            responderJson(exchange, 405, Map.of("error", "Metodo no soportado"));
+            return;
+        }
+        Map<String, String> query = parsearQuery(exchange.getRequestURI().getRawQuery());
+        try {
+            int top = Integer.parseInt(query.getOrDefault("top", String.valueOf(MotorRanking.TOP_POR_DEFECTO)));
+            int repeticiones = Integer.parseInt(query.getOrDefault("repeticiones",
+                    String.valueOf(MotorRanking.REPETICIONES_POR_DEFECTO)));
+            if (top < 1 || top > 100 || repeticiones < 1 || repeticiones > 500) {
+                responderJson(exchange, 400, Map.of("error", "Rangos validos: top 1-100, repeticiones 1-500"));
+                return;
+            }
+            responderJson(exchange, 200, motorRanking.ejecutarComoMapa(top, repeticiones));
+        } catch (NumberFormatException e) {
+            responderJson(exchange, 400, Map.of("error", "Parametros invalidos. Uso: /api/ranking?top=15&repeticiones=50"));
+        }
     }
 
     // -----------------------------------------------------------------
