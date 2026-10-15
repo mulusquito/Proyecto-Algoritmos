@@ -16,6 +16,9 @@ por el docente, y responde a dos requerimientos funcionales:
   2 algoritmos basados en Inteligencia Artificial.
 - **Requerimiento 2:** agrupamiento jerárquico de los 20 abstracts usando 3 criterios de enlace distintos,
   representado como dendrograma, y evaluado con una métrica de coherencia interna.
+- **Seguimiento (ranking de términos):** listado de los términos más frecuentes del corpus, ordenado con 3
+  algoritmos no basados en comparaciones (Counting Sort, Radix Sort y Bucket Sort), con fundamentación
+  teórica, medición empírica de tiempos y validación del top 15 (sección 6).
 
 De acuerdo con la nota del enunciado ("la presente descripción del proyecto puede ser modificada [...] en
 particular con los requerimientos funcionales"), este documento cubre los requerimientos 1, 2 y 6
@@ -77,6 +80,7 @@ resuelva directamente el problema, conforme lo exige el enunciado.
 | `similitud.ia` | Los 2 algoritmos con IA + `RepositorioEmbeddings` + `VectorizadorEmbeddings`. |
 | `clustering` | Algoritmo aglomerativo genérico, las 3 estrategias de enlace, dendrograma. |
 | `clustering.evaluacion` | `CorrelacionCofenetica`: métrica de evaluación interna. |
+| `ordenamiento` | `ContadorFrecuencias`, los 3 algoritmos de ordenamiento no comparativos (interfaz `AlgoritmoOrdenamiento`) y `MotorRanking` (orquestador y medición de tiempos). |
 | `web` | `ServidorHttp`: servidor HTTP, rutas de la API REST, archivos estáticos. |
 | `util` | `JsonParser` / `JsonEscritor`: utilidades de lectura/escritura JSON propias. |
 
@@ -604,10 +608,213 @@ qué, para corpus muy grandes, se preferirían algoritmos de clustering con mejo
 
 ---
 
-## 6. Aplicación web
+## 6. Seguimiento — Ranking de términos mediante algoritmos de ordenamiento
+
+A partir del preprocesamiento de los 20 abstracts, la aplicación genera el listado de los términos más
+frecuentes del corpus completo, ordenado con tres algoritmos que **no se basan en comparaciones directas entre
+elementos**: Counting Sort, Radix Sort y Bucket Sort. El código está en el paquete `ordenamiento`.
+
+### 6.1 Construcción de la lista de frecuencias (`ContadorFrecuencias`)
+
+1. Cada abstract pasa por el pipeline `procesarParaEmbeddings` de la sección 3.2 (minúsculas, sin acentos ni
+   puntuación, tokenización, sin stopwords). Se usa la variante **sin stemming** para que el ranking muestre
+   palabras reales ("education", "learning") y no raíces truncadas ("educ", "learn").
+2. Se cuenta la frecuencia de cada término en todo el corpus con un mapa que conserva el orden de **primera
+   aparición** (artículo 1, 2, …, 20).
+3. El resultado es un arreglo de pares `TerminoFrecuencia(termino, frecuencia)`. La frecuencia es la
+   **clave** de ordenamiento y el término es el dato satélite que viaja con ella: los algoritmos mueven el par
+   completo, no solo el número.
+
+Sobre el corpus del proyecto se obtiene:
+
+| Parámetro | Valor | Papel en el análisis |
+|---|---|---|
+| n (términos distintos) | 980 | tamaño de la entrada |
+| Tokens totales | 2402 | suma de todas las frecuencias |
+| k (frecuencia máxima) | 86 ("ai") | rango de claves de Counting Sort |
+| Valores de frecuencia distintos | 25 | cubetas ocupadas en Bucket Sort |
+| d (dígitos de k en base 10) | 2 | pasadas de Radix Sort |
+| m (cubetas de Bucket Sort) | 980 (= n) | |
+
+La distribución es muy sesgada (ley de Zipf): 587 términos aparecen una sola vez, 176 dos veces, 67 tres veces,
+y solo 9 términos superan una frecuencia de 20.
+
+### 6.2 Fundamentación teórica: por qué se logra O(n + k) u O(n)
+
+**La cota inferior de los algoritmos por comparación.** Un algoritmo que solo obtiene información comparando
+pares de elementos (Quicksort, Mergesort, Heapsort, Inserción) se puede modelar con un **árbol de decisión**
+binario: cada nodo interno es una comparación `a[i] ≤ a[j]` y cada hoja es una de las n! permutaciones
+posibles de la entrada. Para distinguir todas las permutaciones el árbol necesita al menos n! hojas, y un
+árbol binario de altura h tiene como máximo 2^h hojas, así que
+
+```
+2^h ≥ n!   ⇒   h ≥ log₂(n!) = Θ(n log n)       (aproximación de Stirling)
+```
+
+Es decir, **cualquier** ordenamiento por comparación hace Ω(n log n) comparaciones en el peor caso.
+
+**Cómo la evitan estos tres algoritmos.** Counting, Radix y Bucket Sort no deciden la posición de un elemento
+comparándolo con otro: usan el **valor de la clave como índice** de un arreglo (acceso O(1) en el modelo RAM).
+Al no ser algoritmos de comparación, la cota Ω(n log n) no se les aplica. El precio es una suposición sobre los
+datos: las claves deben ser enteros en un rango acotado (o, en Bucket Sort, repartirse de forma aproximadamente
+uniforme). Las frecuencias de términos cumplen la primera condición: son enteros entre 1 y k.
+
+#### 6.2.1 Counting Sort — O(n + k)
+
+```
+1. conteo[0..k] ← 0
+   para cada elemento x:  conteo[x.frecuencia]++                    → n pasos
+2. acumulado ← 0
+   para v = k hasta 0:  inicio[v] ← acumulado; acumulado += conteo[v]  → k+1 pasos
+3. para cada elemento x (en el orden de la entrada):
+       salida[inicio[x.frecuencia]++] ← x                           → n pasos
+```
+
+T(n, k) = c₁·n + c₂·(k+1) + c₃·n ∈ **O(n + k)**, con espacio O(n + k) para `conteo`, `inicio` y `salida`. El
+paso 2 recorre las claves **de mayor a menor**, así que las frecuencias altas quedan al principio (orden
+descendente sin tener que invertir). El paso 3 recorre la entrada en su orden original, y eso hace al algoritmo
+**estable**: dos términos con la misma frecuencia salen en el mismo orden en que entraron.
+
+Si k = O(n), el costo es **O(n)**. En el corpus k = 86 y n = 980, así que el término k es despreciable: el
+arreglo de conteo tiene solo 87 posiciones.
+
+#### 6.2.2 Radix Sort (LSD, base 10) — O(d·(n + b))
+
+Radix Sort ordena por un dígito a la vez, desde el menos significativo (unidades) hasta el más significativo,
+con un **Counting Sort estable sobre ese dígito** (b = 10 valores posibles, del 0 al 9) en cada pasada.
+
+- Cada pasada cuesta O(n + b).
+- El número de pasadas es d = ⌊log₁₀ k⌋ + 1.
+- Total: T(n) = d·(c·n + c'·b) ∈ **O(d·(n + b))**. Con b = 10 y d = 2 constantes para este corpus, el costo es
+  **O(n)**.
+
+**Corrección (por inducción sobre las pasadas).** Después de la pasada i, el arreglo está ordenado según los i
+dígitos menos significativos. En la pasada i+1, dos claves con distinto dígito i+1 quedan en el orden correcto
+por ese dígito; si tienen el mismo dígito i+1, la **estabilidad** de la pasada conserva el orden que ya tenían
+por los i dígitos anteriores. Al terminar las d pasadas, el arreglo está ordenado por la clave completa. Por eso
+Radix necesita que el ordenamiento interno sea estable, y por eso se usa Counting Sort.
+
+Ejemplo con frecuencias 86, 57, 40, 38 y 33: tras la pasada de unidades (dígito 9 primero, 0 al final) el orden es 38, 57, 86, 33, 40;
+tras la pasada de decenas el orden es 86, 57, 40, 38, 33.
+
+#### 6.2.3 Bucket Sort — O(n + m) esperado
+
+La versión clásica (Cormen et al.) reparte números reales de [0, 1) en n cubetas. Para frecuencias enteras en
+[min, max] se usan m = n cubetas y la función de distribución
+
+```
+indice(x) = ⌊ (x.frecuencia − min) · m / (max − min + 1) ⌋
+```
+
+que es **monótona**: una cubeta de índice mayor solo contiene frecuencias mayores o iguales, así que las cubetas
+no se comparan entre sí. Luego cada cubeta se ordena con Inserción (estable y descendente) y las cubetas se
+concatenan de la de mayor índice a la de menor.
+
+- Distribuir y concatenar cuesta O(n + m).
+- Ordenar la cubeta i con Inserción cuesta O(nᵢ²) en el peor caso.
+- Si las claves se reparten de forma **uniforme**, E[nᵢ²] = 2 − 1/n (Cormen et al., cap. 8.4), así que el costo
+  esperado es T(n) = Θ(n) + Σ O(E[nᵢ²]) = **O(n)**. El peor caso, con todas las claves distintas en una sola
+  cubeta, es O(n²).
+
+**Análisis sobre el corpus real.** La distribución de Zipf **no** es uniforme: la cubeta de la frecuencia 1 tiene
+587 términos. Aun así, el costo es lineal: como el rango de claves (max − min + 1 = 86) es menor que m = 980, cada
+cubeta corresponde a **un único valor de frecuencia**. Dentro de una cubeta todas las claves son iguales, así que
+Inserción solo hace nᵢ − 1 comparaciones y ningún desplazamiento: O(nᵢ). Sumando todas las cubetas se obtiene
+O(n + m) = O(n). Solo 25 de las 980 cubetas quedan ocupadas.
+
+> Nota: Bucket Sort no compara elementos para **distribuirlos** (esa fase es la que rompe la cota
+> Ω(n log n)), pero sí usa comparaciones dentro de cada cubeta. Su linealidad depende de que las cubetas sean
+> pequeñas o, como aquí, de que cada una contenga claves iguales.
+
+#### 6.2.4 Resumen
+
+| Algoritmo | Tiempo | Espacio extra | Estable | Valor en el corpus |
+|---|---|---|---|---|
+| Counting Sort | O(n + k) | O(n + k) | Sí | n + k = 980 + 86 |
+| Radix Sort (LSD, b=10) | O(d·(n + b)) | O(n + b) | Sí | 2 · (980 + 10) |
+| Bucket Sort | O(n + m) esperado, O(n²) peor | O(n + m) | Sí | 980 + 980, cubetas de un solo valor |
+| *Referencia: por comparación* | *Ω(n log n)* | — | — | *980 · log₂ 980 ≈ 9 700* |
+
+### 6.3 Medición empírica
+
+`MotorRanking` ejecuta los tres algoritmos sobre la lista de frecuencias del corpus completo (n = 980) y mide el
+tiempo real con `System.nanoTime()`, convertido a milisegundos. Para que la medición sea justa:
+
+- **Calentamiento de la JVM:** las primeras ejecuciones corren en modo interpretado, antes de que el compilador
+  JIT optimice el código, y no representan el costo del algoritmo. Se hacen 200 ejecuciones sin medir antes de
+  empezar.
+- **Repeticiones intercaladas:** se mide R veces (50 por defecto, configurable en la interfaz) en el orden
+  Counting, Radix, Bucket, Counting, …, para que ninguno se vea favorecido o perjudicado por el momento en que
+  corre (recolector de basura, otros procesos).
+- **Mediana como medida principal:** algunas repeticiones aisladas se disparan por pausas del recolector de
+  basura (máximos de hasta varios milisegundos). La mediana no se ve afectada por esos valores atípicos; el
+  promedio sí.
+
+Resultados en el equipo de desarrollo (R = 200, tres ejecuciones independientes de la JVM):
+
+| Algoritmo | Mediana (ms) ejecución 1 | Mediana (ms) ejecución 2 | Mediana (ms) ejecución 3 |
+|---|---|---|---|
+| Counting Sort | 0.0117 | 0.0123 | 0.0117 |
+| Radix Sort | 0.0645 | 0.0596 | 0.0480 |
+| Bucket Sort | 0.1417 | 0.2216 | 0.1807 |
+
+Los valores absolutos dependen del equipo; la pestaña **"Seguimiento · Ranking de términos"** de la aplicación
+repite la medición en vivo.
+
+**Análisis.** Los tres algoritmos ordenan los 980 términos en **fracciones de milisegundo**, como corresponde a
+un costo lineal con n pequeño. Como los tres son O(n) sobre este corpus, la diferencia entre ellos está en las
+**constantes**, no en el orden de crecimiento:
+
+- **Counting Sort** es el más rápido: hace 2 recorridos de la entrada y uno del arreglo de conteo, que tiene
+  solo 87 posiciones.
+- **Radix Sort** hace d = 2 pasadas, y cada una es un Counting Sort completo (2 recorridos más un arreglo
+  auxiliar de salida). Cuesta aproximadamente el doble de trabajo, y además divide y calcula el módulo para
+  extraer cada dígito.
+- **Bucket Sort** es el más lento porque crea m = 980 listas dinámicas (`ArrayList`), aunque solo 25 se usan.
+  El costo de reservar memoria para esas cubetas domina el tiempo. Con m = (max − min + 1) = 86 cubetas sería
+  más rápido, pero se mantiene m = n por fidelidad al algoritmo clásico.
+
+### 6.4 Validación de resultados: los 15 términos más frecuentes
+
+Los tres algoritmos producen **exactamente el mismo orden** para los 980 términos. La aplicación lo verifica
+elemento por elemento y lo muestra con la etiqueta "Validado"; las pruebas de la sección 8 también lo
+comprueban. El top 15 obtenido por cada algoritmo:
+
+| # | Término | Frecuencia | Counting Sort | Radix Sort | Bucket Sort |
+|---|---|---|---|---|---|
+| 1 | ai | 86 | ✓ | ✓ | ✓ |
+| 2 | education | 57 | ✓ | ✓ | ✓ |
+| 3 | learning | 40 | ✓ | ✓ | ✓ |
+| 4 | aied | 38 | ✓ | ✓ | ✓ |
+| 5 | educational | 33 | ✓ | ✓ | ✓ |
+| 6 | assessment | 31 | ✓ | ✓ | ✓ |
+| 7 | intelligence | 23 | ✓ | ✓ | ✓ |
+| 8 | artificial | 22 | ✓ | ✓ | ✓ |
+| 9 | studies | 21 | ✓ | ✓ | ✓ |
+| 10 | higher | 16 | ✓ | ✓ | ✓ |
+| 11 | literature | 15 | ✓ | ✓ | ✓ |
+| 12 | technologies | 15 | ✓ | ✓ | ✓ |
+| 13 | systematic | 15 | ✓ | ✓ | ✓ |
+| 14 | future | 14 | ✓ | ✓ | ✓ |
+| 15 | systems | 14 | ✓ | ✓ | ✓ |
+
+**Empates.** Como los tres algoritmos son estables y reciben la misma entrada (los términos en orden de primera
+aparición), a igual frecuencia aparece primero el término que surgió antes en el corpus. Por ejemplo, entre
+"literature", "technologies" y "systematic" (15 cada uno), el orden refleja en qué abstract apareció cada uno por
+primera vez. El corte del top 15 no es ambiguo: exactamente dos términos tienen frecuencia 14 ("future" y
+"systems") y ocupan los puestos 14 y 15. Con frecuencia 13 está "findings", en el puesto 16.
+
+**Lectura del resultado.** El ranking confirma el dominio del corpus: inteligencia artificial ("ai",
+"artificial", "intelligence", y "aied", la sigla de *AI in Education*) aplicada a la educación ("education",
+"educational", "learning", "higher"), con un fuerte componente de revisiones de literatura ("studies",
+"literature", "systematic") y de evaluación ("assessment").
+
+---
+
+## 7. Aplicación web
 
 La interfaz web (`app/src/main/resources/static/`) es una aplicación de una sola página (HTML + CSS + JS
-vainilla, sin frameworks ni CDN) con 4 secciones:
+vainilla, sin frameworks ni CDN) con 5 secciones:
 
 1. **Corpus:** tabla de los 20 artículos con acceso al abstract completo.
 2. **Requerimiento 1:** selección dinámica de dos artículos (tal como exige el enunciado) y comparación con
@@ -615,7 +822,10 @@ vainilla, sin frameworks ni CDN) con 4 secciones:
    términos con mayor peso, palabras en común, según el algoritmo).
 3. **Requerimiento 2:** tabla comparativa de correlación cofenética de los 3 algoritmos, con el más coherente
    resaltado, y visualización interactiva de cada dendrograma.
-4. **Acerca del proyecto:** resumen de la solución y enlaces al repositorio.
+4. **Seguimiento · Ranking de términos:** parámetros del corpus (n, k, d, cubetas), tabla de tiempos de los 3
+   algoritmos de ordenamiento (con botón para volver a medir y elegir el número de repeticiones) y el top 15
+   de cada algoritmo, lado a lado.
+5. **Acerca del proyecto:** resumen de la solución y enlaces al repositorio.
 
 La API REST que consume el frontend:
 
@@ -625,22 +835,29 @@ La API REST que consume el frontend:
 | `GET /api/articulos/{id}` | Un artículo específico. |
 | `GET /api/similitud?idA=&idB=` | Ejecuta los 6 algoritmos de similitud sobre el par indicado. |
 | `GET /api/clustering` | Ejecuta los 3 algoritmos de clustering y su evaluación cofenética. |
+| `GET /api/ranking?top=15&repeticiones=50` | Ordena la lista de frecuencias con Counting, Radix y Bucket Sort, mide sus tiempos y devuelve el top N de cada uno. |
 
 ---
 
-## 7. Pruebas de verificación
+## 8. Pruebas de verificación
 
 Se implementó una batería de pruebas manuales (`app/src/test/java/.../PruebasAlgoritmos.java`, sin JUnit por
 la misma razón declarada en la sección 2.3) que compara la salida de cada algoritmo contra casos de referencia
 matemáticamente conocidos: distancia de Levenshtein("kitten","sitting")=3, similitud de un texto consigo mismo
 = 1.0 en los 4 algoritmos aplicables, Jaccard = 0 para conjuntos disjuntos, y una prueba de clustering sobre 4
 puntos sintéticos con estructura de 2 pares claramente separados, verificando que el algoritmo los fusiona en
-el orden correcto y que la correlación cofenética resultante es alta (>0.9). Las 17 aserciones pasan
-(ver `README.md` para el comando de ejecución).
+el orden correcto y que la correlación cofenética resultante es alta (>0.9).
+
+Para el ranking de términos (sección 6) se verifica, para cada uno de los 3 algoritmos de ordenamiento: un
+caso pequeño con empates cuyo resultado esperado exige orden descendente **y** estabilidad; el arreglo vacío;
+que la entrada no se modifique; 5000 claves aleatorias con distribución sesgada (de 1 a 4 dígitos) comparadas
+contra un oráculo independiente (el ordenamiento estable de la librería estándar, usado **solo** en la prueba);
+y, sobre el corpus real, que el resultado esté ordenado y que los tres algoritmos coincidan elemento por
+elemento. Las 33 aserciones pasan (ver `README.md` para el comando de ejecución).
 
 ---
 
-## 8. Despliegue
+## 9. Despliegue
 
 La aplicación se empaqueta como una imagen Docker (`app/Dockerfile`, build multi-etapa: Maven + JDK para
 compilar, JRE liviano para ejecutar) y puede desplegarse en cualquier plataforma que soporte contenedores
@@ -655,7 +872,7 @@ Resumen rápido para Render.com:
 
 ---
 
-## 9. Limitaciones y trabajo futuro
+## 10. Limitaciones y trabajo futuro
 
 - La extracción de metadatos de los PDFs es semi-automática (requirió corrección manual); un trabajo futuro
   podría mejorar la heurística de segmentación de columnas.
@@ -668,7 +885,7 @@ Resumen rápido para Render.com:
 
 ---
 
-## 10. Referencias
+## 11. Referencias
 
 - Levenshtein, V. I. (1966). Binary codes capable of correcting deletions, insertions, and reversals.
 - Needleman, S. B., & Wunsch, C. D. (1970). A general method applicable to the search for similarities in the
@@ -679,5 +896,8 @@ Resumen rápido para Render.com:
 - Lance, G. N., & Williams, W. T. (1967). A general theory of classificatory sorting strategies.
 - Sokal, R. R., & Rohlf, F. J. (1962). The comparison of dendrograms by objective methods. *Taxon*, 11(2).
 - Pennington, J., Socher, R., & Manning, C. D. (2014). GloVe: Global Vectors for Word Representation.
+- Cormen, T. H., Leiserson, C. E., Rivest, R. L., & Stein, C. (2009). *Introduction to Algorithms* (3.ª ed.),
+  cap. 8: Sorting in Linear Time (cota inferior por comparación, Counting Sort, Radix Sort, Bucket Sort).
+- Zipf, G. K. (1949). *Human Behavior and the Principle of Least Effort*.
 - Los 20 artículos científicos del corpus (ver `recursos/articulos-originales/` y las referencias completas
   embebidas como metadato `autores`/`titulo` en `extraction/articulos.json`).
