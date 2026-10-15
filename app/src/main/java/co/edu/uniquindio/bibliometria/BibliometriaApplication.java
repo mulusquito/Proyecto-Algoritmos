@@ -2,6 +2,7 @@ package co.edu.uniquindio.bibliometria;
 
 import co.edu.uniquindio.bibliometria.clustering.MotorClustering;
 import co.edu.uniquindio.bibliometria.datos.RepositorioArticulos;
+import co.edu.uniquindio.bibliometria.ordenamiento.MotorRanking;
 import co.edu.uniquindio.bibliometria.similitud.MotorSimilitud;
 import co.edu.uniquindio.bibliometria.similitud.ia.RepositorioEmbeddings;
 import co.edu.uniquindio.bibliometria.web.ServidorHttp;
@@ -18,7 +19,9 @@ import co.edu.uniquindio.bibliometria.web.ServidorHttp;
  * servidor HTTP), lo cual es perfectamente manejable dado el tamano del
  * proyecto y evita depender de Spring Boot (ver {@link ServidorHttp} para
  * la justificacion completa).
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class BibliometriaApplication {
 
     public static void main(String[] args) throws Exception {
@@ -38,7 +41,11 @@ public class BibliometriaApplication {
         System.out.println("Inicializando motor de clustering jerarquico (Requerimiento 2)...");
         MotorClustering motorClustering = new MotorClustering(repositorioArticulos, motorSimilitud);
 
-        ServidorHttp servidor = new ServidorHttp(puerto, repositorioArticulos, motorSimilitud, motorClustering);
+        System.out.println("Construyendo lista de frecuencias de terminos (Seguimiento: ranking)...");
+        MotorRanking motorRanking = new MotorRanking(repositorioArticulos);
+        System.out.println("  -> " + motorRanking.getFrecuencias().length + " terminos distintos.");
+
+        ServidorHttp servidor = new ServidorHttp(puerto, repositorioArticulos, motorSimilitud, motorClustering, motorRanking);
         servidor.iniciar();
 
         System.out.println("Aplicacion iniciada. Escuchando en el puerto " + puerto);

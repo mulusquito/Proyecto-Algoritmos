@@ -11,7 +11,9 @@ import java.util.Set;
  * (sin depender de una libreria de NLP externa) para cumplir con la
  * restriccion del proyecto de no usar funciones de alto nivel que
  * reemplacen el trabajo algoritmico que se pide implementar.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public final class ListaStopwords {
 
     public static final Set<String> STOPWORDS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(

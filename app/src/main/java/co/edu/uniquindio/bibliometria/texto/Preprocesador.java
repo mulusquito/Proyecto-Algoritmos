@@ -20,7 +20,9 @@ import java.util.List;
  * {@link #normalizarParaEdicion(String)} (texto normalizado a nivel de
  * caracter, usado por Levenshtein y Needleman-Wunsch, que comparan cadenas
  * completas y no bolsas de palabras).
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public final class Preprocesador {
 
     private Preprocesador() {

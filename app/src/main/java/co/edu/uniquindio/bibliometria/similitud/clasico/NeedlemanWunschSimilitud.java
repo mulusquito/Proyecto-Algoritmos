@@ -29,7 +29,9 @@ import java.util.List;
  * F[i][0] = i * gap
  * F[i][j] = max( F[i-1][j-1] + s(Ai,Bj), F[i-1][j] + gap, F[i][j-1] + gap )
  * </pre>
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class NeedlemanWunschSimilitud {
 
     public static final String NOMBRE = "Needleman-Wunsch (alineamiento global de tokens)";
@@ -38,6 +40,13 @@ public class NeedlemanWunschSimilitud {
     private static final int MISMATCH = -1;
     private static final int GAP = -1;
 
+    /**
+     * Calcula la matriz F de programacion dinamica del alineamiento global.
+     *
+     * @param a tokens preprocesados del primer abstract (longitud n)
+     * @param b tokens preprocesados del segundo abstract (longitud m)
+     * @return matriz F de tamano (n+1) x (m+1) con los puntajes de alineamiento parciales
+     */
     public int[][] construirMatriz(List<String> a, List<String> b) {
         int n = a.size();
         int m = b.size();
@@ -62,6 +71,13 @@ public class NeedlemanWunschSimilitud {
         return f;
     }
 
+    /**
+     * Calcula la similitud de Needleman-Wunsch entre dos abstracts, a nivel de tokens.
+     *
+     * @param abstractA texto crudo del primer abstract
+     * @param abstractB texto crudo del segundo abstract
+     * @return resultado con la similitud normalizada en [0,1] y el detalle del alineamiento
+     */
     public ResultadoSimilitud calcular(String abstractA, String abstractB) {
         List<String> a = Preprocesador.procesarParaVectorial(abstractA);
         List<String> b = Preprocesador.procesarParaVectorial(abstractB);

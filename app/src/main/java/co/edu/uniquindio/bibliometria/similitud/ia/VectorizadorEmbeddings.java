@@ -14,7 +14,9 @@ import java.util.List;
  * palabras encontradas) se implementa manualmente con operaciones
  * aritmeticas basicas sobre arreglos, sin usar ninguna libreria de
  * algebra lineal.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class VectorizadorEmbeddings {
 
     private final RepositorioEmbeddings repositorio;
@@ -35,6 +37,12 @@ public class VectorizadorEmbeddings {
         }
     }
 
+    /**
+     * Promedia los vectores de embedding de las palabras de un documento.
+     *
+     * @param tokens tokens del documento (sin estemizar, para hacer match con el vocabulario de GloVe)
+     * @return vector promedio junto con estadisticas de cobertura (palabras encontradas / totales)
+     */
     public VectorDocumento vectorizar(List<String> tokens) {
         double[] suma = new double[RepositorioEmbeddings.DIMENSIONES];
         int encontradas = 0;

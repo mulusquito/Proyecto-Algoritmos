@@ -12,7 +12,9 @@ package co.edu.uniquindio.bibliometria.texto;
  * No se utiliza ninguna libreria de stemming/NLP: todas las reglas de
  * medida silabica (m), deteccion de vocales y sufijos se implementan de
  * forma explicita con operaciones basicas sobre {@code char[]}.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public final class Stemmer {
 
     private Stemmer() {

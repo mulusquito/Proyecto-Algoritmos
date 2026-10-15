@@ -8,7 +8,9 @@ package co.edu.uniquindio.bibliometria.clustering;
  * <p>
  * Cada implementacion corresponde a uno de los 3 criterios de agrupamiento
  * jerarquico exigidos por el Requerimiento 2 del proyecto.
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public interface EstrategiaEnlace {
 
     /**

@@ -19,7 +19,9 @@ import java.util.Map;
  * ninguna libreria de clustering (scikit-learn, Weka, Apache Commons Math,
  * etc.): la busqueda del par minimo y la actualizacion de distancias se
  * hacen con estructuras basicas (mapas y bucles).
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class ClusteringJerarquico {
 
     /**

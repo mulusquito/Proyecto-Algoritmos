@@ -17,17 +17,29 @@ import java.util.Map;
  * (ponderado por relevancia) producen un angulo de 0 grados
  * (similitud = 1); dos documentos sin ningun termino en comun producen un
  * angulo de 90 grados (similitud = 0).
- */
+  *
+ * @author Melissa Restrepo Henao - Universidad del Quindio
+*/
 public class CosenoTfIdfSimilitud {
 
     public static final String NOMBRE = "Similitud del Coseno (TF-IDF)";
 
     private final TfIdfVectorizador vectorizador;
 
+    /**
+     * @param vectorizador vectorizador TF-IDF ya entrenado sobre el corpus completo de 20 abstracts
+     */
     public CosenoTfIdfSimilitud(TfIdfVectorizador vectorizador) {
         this.vectorizador = vectorizador;
     }
 
+    /**
+     * Calcula la similitud del coseno TF-IDF entre dos abstracts.
+     *
+     * @param tokensA tokens estemizados (sin stopwords) del primer abstract
+     * @param tokensB tokens estemizados (sin stopwords) del segundo abstract
+     * @return resultado con el coseno en [-1,1] y el detalle de normas, angulo y terminos mas relevantes
+     */
     public ResultadoSimilitud calcular(List<String> tokensA, List<String> tokensB) {
         Map<String, Double> vectorA = vectorizador.vectorizar(tokensA);
         Map<String, Double> vectorB = vectorizador.vectorizar(tokensB);

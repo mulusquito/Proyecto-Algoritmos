@@ -10,6 +10,9 @@ textual sobre un corpus de 20 artículos científicos sobre Inteligencia Artific
   Coseno y Distancia Euclidiana sobre *embeddings* preentrenados GloVe).
 - **Requerimiento 2 — Agrupamiento jerárquico**: 3 algoritmos de clustering (Single, Complete y Average Linkage)
   construidos desde cero, con dendrogramas y evaluación mediante el Coeficiente de Correlación Cofenética.
+- **Seguimiento — Ranking de términos**: los términos más frecuentes de los 20 abstracts, ordenados con 3
+  algoritmos no basados en comparaciones (Counting Sort, Radix Sort y Bucket Sort), con medición de tiempos en
+  milisegundos y validación del top 15.
 - **Aplicación web desplegable** que permite explorar el corpus, comparar artículos y visualizar los
   dendrogramas interactivamente.
 
@@ -71,7 +74,7 @@ java -cp target/test-classes co.edu.uniquindio.bibliometria.PruebasAlgoritmos
 
 ## Despliegue
 
-Ver `app/Dockerfile` y la sección "Despliegue" del [documento técnico](docs/DOCUMENTO_TECNICO.md#8-despliegue)
+Ver `app/Dockerfile` y la sección "Despliegue" del [documento técnico](docs/DOCUMENTO_TECNICO.md#9-despliegue)
 para instrucciones detalladas de despliegue en Render/Railway.
 
 ## Flujo de ramas de Git
