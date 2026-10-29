@@ -13,15 +13,30 @@ let RANKING_CARGADO = false;      // si ya se midio el ranking al menos una vez
 document.addEventListener("DOMContentLoaded", () => {
     configurarTabs();
     configurarTabsClustering();
-    cargarArticulos();
-    document.getElementById("btn-comparar").addEventListener("click", ejecutarComparacion);
-    document.getElementById("btn-medir").addEventListener("click", cargarRanking);
-    document.getElementById("btn-buscar").addEventListener("click", ejecutarBusqueda);
+    ejecutarConAviso(cargarArticulos, "tabla-articulos");
+    document.getElementById("btn-comparar").addEventListener("click", () => ejecutarConAviso(ejecutarComparacion, "resultado-similitud"));
+    document.getElementById("btn-medir").addEventListener("click", () => ejecutarConAviso(cargarRanking, "resumen-ranking"));
+    document.getElementById("btn-buscar").addEventListener("click", () => ejecutarConAviso(ejecutarBusqueda, "resumen-busqueda"));
     document.getElementById("select-corte").addEventListener("change", () => { if (CLUSTERING_RESPUESTA) dibujarDendrogramaActual(); });
     document.getElementById("input-patron").addEventListener("keydown", e => {
-        if (e.key === "Enter") ejecutarBusqueda();
+        if (e.key === "Enter") ejecutarConAviso(ejecutarBusqueda, "resumen-busqueda");
     });
 });
+
+// Ejecuta una funcion asincrona (una peticion al servidor) y, si falla, por ejemplo porque el servidor
+// no responde, muestra el error en el contenedor indicado en lugar de perderlo en silencio.
+function ejecutarConAviso(funcionAsincrona, idContenedor) {
+    funcionAsincrona().catch(error => mostrarError(idContenedor, error));
+}
+
+// Muestra un mensaje de error dentro del contenedor indicado.
+function mostrarError(idContenedor, error) {
+    const contenedor = document.getElementById(idContenedor);
+    if (!contenedor) return;
+    const detalle = error && error.message ? error.message : String(error);
+    contenedor.innerHTML = `<p style="color:#b3552b">No se pudo completar la operación (${escaparHtml(detalle)}).
+        Verifica que el servidor esté en ejecución y vuelve a intentarlo.</p>`;
+}
 
 // ------------------------------------------------------------
 // Navegacion por pestanas
@@ -35,10 +50,10 @@ function configurarTabs() {
             btn.classList.add("activo");
             document.getElementById("tab-" + btn.dataset.tab).classList.add("activo");
             if (btn.dataset.tab === "clustering" && !CLUSTERING_RESPUESTA) {
-                cargarClustering();
+                ejecutarConAviso(cargarClustering, "resumen-clustering");
             }
             if (btn.dataset.tab === "ranking" && !RANKING_CARGADO) {
-                cargarRanking();
+                ejecutarConAviso(cargarRanking, "resumen-ranking");
             }
         });
     });
