@@ -104,6 +104,15 @@ details summary { cursor: pointer; color: var(--color-secundario); }
 #contenedor-dendrograma { background: white; border-radius: var(--radio); padding: 16px; margin-top: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow-x: auto; }
 #contenedor-dendrograma svg { display: block; }
 .linea-dendro { stroke: var(--color-secundario); stroke-width: 1.6; fill: none; }
+.linea-corte { stroke: #b3552b; stroke-width: 1.4; stroke-dasharray: 6 4; }
+.texto-corte { font-size: 10px; fill: #b3552b; }
+.selector-corte { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; margin-left: auto; }
+.clustering-tabs { flex-wrap: wrap; align-items: center; }
+#detalle-dendrograma details { background: white; border-radius: var(--radio); padding: 8px 14px; margin-top: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); font-size: 0.85rem; }
+#detalle-dendrograma table { box-shadow: none; font-size: 0.82rem; }
+#detalle-dendrograma td, #detalle-dendrograma th { padding: 5px 8px; }
+.tabla-cortes td, .tabla-cortes th { text-align: center; }
+.tabla-cortes td:first-child, .tabla-cortes th:first-child { text-align: left; }
 .etiqueta-hoja { font-size: 9px; fill: #333; }
 
 #resumen-ranking { background: white; padding: 14px 18px; border-radius: var(--radio); box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-top: 12px; }
@@ -117,6 +126,39 @@ details summary { cursor: pointer; color: var(--color-secundario); }
 .celda-frecuencia span { min-width: 22px; text-align: right; font-variant-numeric: tabular-nums; }
 .nota { font-size: 0.82rem; color: #666; }
 
+.selector-multiple { background: white; padding: 14px 16px; border-radius: var(--radio); box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin: 16px 0; }
+.selector-multiple-cabecera { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.selector-multiple-cabecera span { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.lista-seleccion { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 4px 16px; max-height: 260px; overflow-y: auto; font-size: 0.85rem; }
+.lista-seleccion label { display: flex; gap: 6px; align-items: flex-start; cursor: pointer; padding: 3px 4px; border-radius: 4px; }
+.lista-seleccion label:hover { background: #eef3f8; }
+.abstracts-seleccionados details { background: white; border-radius: var(--radio); padding: 8px 12px; margin: 6px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.06); font-size: 0.85rem; }
+.matriz-similitud { width: auto; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.matriz-similitud th, .matriz-similitud td { padding: 6px 9px; text-align: center; border: 1px solid var(--color-borde); position: static; }
+.matriz-similitud td.par { cursor: pointer; }
+.matriz-similitud td.par:hover { outline: 2px solid var(--color-acento); }
+.contenedor-matriz { overflow-x: auto; }
+#resultado-similitud h3 { color: var(--color-primario); margin-top: 26px; }
+#btn-buscar { background: var(--color-acento); color: #3a2a08; border: none; font-weight: 700; cursor: pointer; height: 38px; }
+#btn-buscar:hover { filter: brightness(1.08); }
+input[type="text"] { font-size: 0.9rem; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--color-borde); }
+.selector-articulos label.casilla { flex: 0 0 auto; min-width: 0; justify-content: center; height: 38px; font-weight: 400; }
+#resumen-busqueda { background: white; padding: 14px 18px; border-radius: var(--radio); box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-top: 12px; }
+#resumen-busqueda:empty { display: none; }
+#resultado-busqueda h3 { color: var(--color-primario); margin-top: 28px; }
+.estructuras { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.estructura { background: white; border-radius: var(--radio); padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow-x: auto; }
+.estructura h4 { margin: 0 0 6px 0; color: var(--color-secundario); }
+.tabla-indices { width: auto; margin-top: 6px; box-shadow: none; font-family: Consolas, "Courier New", monospace; font-size: 0.8rem; }
+.tabla-indices th, .tabla-indices td { padding: 3px 7px; text-align: center; border: 1px solid var(--color-borde); position: static; }
+.tabla-indices th { background: #eef3f8; color: var(--color-primario); }
+.traza-tabs { display: flex; gap: 8px; margin: 12px 0 4px 0; flex-wrap: wrap; }
+.traza-paso { font-family: Consolas, "Courier New", monospace; font-size: 0.8rem; white-space: pre; }
+.ch-ok { background: #d4efe0; }
+.ch-mal { background: #f7d6cc; }
+.resaltado { background: #ffe58a; font-weight: 700; padding: 0 1px; border-radius: 2px; }
+.fragmento { font-size: 0.85rem; margin: 4px 0; color: #444; }
+.contenedor-traza { overflow-x: auto; }
 .cargando { color: #777; font-style: italic; padding: 20px 0; }
 footer { text-align: center; color: #777; font-size: 0.8rem; padding: 20px; }
 

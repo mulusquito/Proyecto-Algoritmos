@@ -14,6 +14,7 @@
         <button class="tab-btn activo" data-tab="corpus">Corpus (20 artículos)</button>
         <button class="tab-btn" data-tab="similitud">Requerimiento 1 · Similitud textual</button>
         <button class="tab-btn" data-tab="clustering">Requerimiento 2 · Clustering jerárquico</button>
+        <button class="tab-btn" data-tab="busqueda">Requerimiento 3 · Búsqueda de patrones</button>
         <button class="tab-btn" data-tab="ranking">Seguimiento · Ranking de términos</button>
         <button class="tab-btn" data-tab="acerca">Acerca del proyecto</button>
     </nav>
@@ -30,15 +31,18 @@
     <!-- ================= SIMILITUD ================= -->
     <section id="tab-similitud" class="tab-contenido">
         <h2>Requerimiento 1 &mdash; Análisis de Similitud Textual</h2>
-        <p>Selecciona dos artículos del corpus para compararlos con 4 algoritmos clásicos y 2 algoritmos basados en Inteligencia Artificial.</p>
-        <div class="selector-articulos">
-            <label>Artículo A:
-                <select id="select-articulo-a"></select>
-            </label>
-            <label>Artículo B:
-                <select id="select-articulo-b"></select>
-            </label>
-            <button id="btn-comparar">Comparar</button>
+        <p>Selecciona <strong>dos o más</strong> artículos del corpus para comparar sus abstracts con 4 algoritmos clásicos y 2 algoritmos basados en
+        Inteligencia Artificial. Con dos artículos se muestra el detalle de la comparación; con más, una matriz de similitud por algoritmo y el detalle de cada par.</p>
+        <div class="selector-multiple">
+            <div class="selector-multiple-cabecera">
+                <strong id="contador-seleccion">0 artículos seleccionados</strong>
+                <span>
+                    <button type="button" class="btn-ver" id="btn-seleccionar-todos">Seleccionar todos</button>
+                    <button type="button" class="btn-ver" id="btn-limpiar-seleccion">Limpiar</button>
+                    <button id="btn-comparar">Comparar</button>
+                </span>
+            </div>
+            <div id="lista-seleccion-articulos" class="lista-seleccion"></div>
         </div>
         <div id="resultado-similitud"></div>
     </section>
@@ -52,8 +56,44 @@
             <button class="cluster-tab-btn activo" data-cluster="0">Single Linkage</button>
             <button class="cluster-tab-btn" data-cluster="1">Complete Linkage</button>
             <button class="cluster-tab-btn" data-cluster="2">Average Linkage</button>
+            <label class="selector-corte">Cortar en
+                <select id="select-corte">
+                    <option value="0">sin cortar</option>
+                    <option value="2">2 grupos</option>
+                    <option value="3">3 grupos</option>
+                    <option value="4" selected>4 grupos</option>
+                    <option value="5">5 grupos</option>
+                    <option value="6">6 grupos</option>
+                </select>
+            </label>
         </div>
         <div id="contenedor-dendrograma"></div>
+        <div id="detalle-dendrograma"></div>
+    </section>
+
+    <!-- ================= BUSQUEDA DE PATRONES ================= -->
+    <section id="tab-busqueda" class="tab-contenido">
+        <h2>Requerimiento 3 &mdash; Búsqueda de patrones (coincidencia exacta de cadenas)</h2>
+        <p>Escribe un patrón para localizar sus ocurrencias exactas en los 20 abstracts con <strong>Knuth-Morris-Pratt</strong>,
+        <strong>Boyer-Moore</strong> y <strong>Rabin-Karp</strong>, implementados desde cero (sin <code>indexOf</code>, <code>find</code> ni expresiones regulares).</p>
+        <div class="selector-articulos">
+            <label>Patrón de búsqueda:
+                <input id="input-patron" type="text" maxlength="200" value="generative">
+            </label>
+            <label>Módulo de Rabin-Karp (q):
+                <select id="select-modulo">
+                    <option value="1000000007" selected>1 000 000 007 (primo grande)</option>
+                    <option value="101">101 (primo pequeño: muestra colisiones)</option>
+                </select>
+            </label>
+            <label>Traza paso a paso sobre el abstract:
+                <select id="select-articulo-traza"></select>
+            </label>
+            <label class="casilla"><span><input id="check-mayusculas" type="checkbox"> Distinguir mayúsculas</span></label>
+            <button id="btn-buscar">Buscar</button>
+        </div>
+        <div id="resumen-busqueda"></div>
+        <div id="resultado-busqueda"></div>
     </section>
 
     <!-- ================= RANKING (SEGUIMIENTO) ================= -->
@@ -81,8 +121,9 @@
         <p>Esta aplicación implementa, desde cero (sin funciones de alto nivel de similitud/clustering), los algoritmos exigidos por el proyecto de curso
         <em>"Análisis de algoritmos en el contexto de la bibliometría"</em>:</p>
         <ul>
-            <li><strong>Requerimiento 1:</strong> Levenshtein, Needleman-Wunsch, Similitud del Coseno (TF-IDF) y Coeficiente de Jaccard (algoritmos clásicos); Similitud del Coseno y Distancia Euclidiana sobre embeddings preentrenados GloVe (algoritmos de IA).</li>
+            <li><strong>Requerimiento 1:</strong> Levenshtein, Needleman-Wunsch, Similitud del Coseno (TF-IDF) y Coeficiente de Jaccard (algoritmos clásicos); dos enfoques de embeddings preentrenados, GloVe 100d y FastText 300d, cada uno comparado con similitud del coseno y distancia euclidiana (algoritmos de IA).</li>
             <li><strong>Requerimiento 2:</strong> Clustering jerárquico aglomerativo con enlace simple, completo y promedio (UPGMA), evaluado con el Coeficiente de Correlación Cofenética.</li>
+            <li><strong>Requerimiento 3:</strong> búsqueda de patrones con Knuth-Morris-Pratt, Boyer-Moore (caracter malo y sufijo bueno) y Rabin-Karp (rolling hash), con medición separada de los tiempos de preprocesamiento y de búsqueda.</li>
             <li><strong>Seguimiento:</strong> ranking de los términos más frecuentes del corpus con Counting Sort, Radix Sort y Bucket Sort, con medición de tiempos en milisegundos.</li>
         </ul>
         <p>El backend es una aplicación Java (JDK 17+) sin dependencias externas: usa <code>com.sun.net.httpserver</code> para la API REST y un

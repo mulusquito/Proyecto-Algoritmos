@@ -1,5 +1,6 @@
 package co.edu.uniquindio.bibliometria;
 
+import co.edu.uniquindio.bibliometria.busqueda.MotorBusqueda;
 import co.edu.uniquindio.bibliometria.clustering.MotorClustering;
 import co.edu.uniquindio.bibliometria.datos.RepositorioArticulos;
 import co.edu.uniquindio.bibliometria.ordenamiento.MotorRanking;
@@ -39,12 +40,13 @@ public class BibliometriaApplication {
         RepositorioArticulos repositorioArticulos = new RepositorioArticulos();
         System.out.println("  -> " + repositorioArticulos.total() + " articulos cargados.");
 
-        System.out.println("Cargando modelo de embeddings (GloVe filtrado)...");
-        RepositorioEmbeddings repositorioEmbeddings = new RepositorioEmbeddings();
-        System.out.println("  -> " + repositorioEmbeddings.tamano() + " vectores de palabra cargados.");
+        System.out.println("Cargando modelos de embeddings (GloVe y FastText filtrados)...");
+        RepositorioEmbeddings glove = RepositorioEmbeddings.glove();
+        RepositorioEmbeddings fastText = RepositorioEmbeddings.fastText();
+        System.out.println("  -> GloVe: " + glove.tamano() + " vectores; FastText: " + fastText.tamano() + " vectores.");
 
         System.out.println("Inicializando motor de similitud (Requerimiento 1)...");
-        MotorSimilitud motorSimilitud = new MotorSimilitud(repositorioArticulos, repositorioEmbeddings);
+        MotorSimilitud motorSimilitud = new MotorSimilitud(repositorioArticulos, glove, fastText);
 
         System.out.println("Inicializando motor de clustering jerarquico (Requerimiento 2)...");
         MotorClustering motorClustering = new MotorClustering(repositorioArticulos, motorSimilitud);
@@ -53,7 +55,12 @@ public class BibliometriaApplication {
         MotorRanking motorRanking = new MotorRanking(repositorioArticulos);
         System.out.println("  -> " + motorRanking.getFrecuencias().length + " terminos distintos.");
 
-        ServidorHttp servidor = new ServidorHttp(puerto, repositorioArticulos, motorSimilitud, motorClustering, motorRanking);
+        System.out.println("Preparando textos para la busqueda de patrones (Requerimiento 3)...");
+        MotorBusqueda motorBusqueda = new MotorBusqueda(repositorioArticulos);
+        System.out.println("  -> " + motorBusqueda.getCaracteresTotales() + " caracteres en los abstracts.");
+
+        ServidorHttp servidor = new ServidorHttp(puerto, repositorioArticulos, motorSimilitud, motorClustering,
+                motorRanking, motorBusqueda);
         servidor.iniciar();
 
         System.out.println("Aplicacion iniciada. Escuchando en el puerto " + puerto);

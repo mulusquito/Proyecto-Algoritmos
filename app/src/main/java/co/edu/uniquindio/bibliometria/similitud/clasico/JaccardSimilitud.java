@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Algoritmo clasico de similitud basado en teoria de conjuntos:
@@ -40,27 +39,58 @@ public class JaccardSimilitud {
         List<String> tokensA = Preprocesador.procesarParaVectorial(abstractA);
         List<String> tokensB = Preprocesador.procesarParaVectorial(abstractB);
 
-        // Al pasar a conjunto se descartan las repeticiones: solo importa si la palabra esta o no.
-        Set<String> conjuntoA = new HashSet<>(tokensA);
-        Set<String> conjuntoB = new HashSet<>(tokensB);
+        // 1. Conjuntos: se descartan las repeticiones, solo importa si la palabra esta o no.
+        //    La tabla hash se usa unicamente como estructura de pertenencia (agregar / consultar).
+        Set<String> conjuntoA = new HashSet<>();
+        List<String> distintosA = construirConjunto(tokensA, conjuntoA);
+        Set<String> conjuntoB = new HashSet<>();
+        List<String> distintosB = construirConjunto(tokensB, conjuntoB);
 
-        // Interseccion: palabras presentes en ambos (TreeSet para listarlas en orden alfabetico).
-        Set<String> interseccion = new TreeSet<>(conjuntoA);
-        interseccion.retainAll(conjuntoB);
+        // 2. Interseccion: se recorre el conjunto mas pequeno y se cuenta cada palabra
+        //    que tambien pertenece al otro.
+        List<String> recorrido = distintosA.size() <= distintosB.size() ? distintosA : distintosB;
+        Set<String> otro = recorrido == distintosA ? conjuntoB : conjuntoA;
+        List<String> interseccion = new ArrayList<>();
+        for (String palabra : recorrido) {
+            if (otro.contains(palabra)) {
+                interseccion.add(palabra);
+            }
+        }
 
-        // Union: palabras presentes en al menos uno de los dos.
-        Set<String> union = new HashSet<>(conjuntoA);
-        union.addAll(conjuntoB);
+        // 3. Union por inclusion-exclusion: |A u B| = |A| + |B| - |A n B|
+        //    (las palabras comunes se contarian dos veces).
+        int tamanoUnion = distintosA.size() + distintosB.size() - interseccion.size();
 
-        double similitud = union.isEmpty() ? 0.0 : (double) interseccion.size() / union.size();
+        double similitud = tamanoUnion == 0 ? 0.0 : (double) interseccion.size() / tamanoUnion;
 
         return new ResultadoSimilitud(NOMBRE, "clasico", similitud)
-                .conDetalle("tamanoConjuntoA", conjuntoA.size())
-                .conDetalle("tamanoConjuntoB", conjuntoB.size())
+                .conDetalle("tamanoConjuntoA", distintosA.size())
+                .conDetalle("tamanoConjuntoB", distintosB.size())
                 .conDetalle("tamanoInterseccion", interseccion.size())
-                .conDetalle("tamanoUnion", union.size())
+                .conDetalle("tamanoUnion", tamanoUnion)
+                .conDetalle("calculo", interseccion.size() + " / (" + distintosA.size() + " + " + distintosB.size()
+                        + " - " + interseccion.size() + ") = " + interseccion.size() + " / " + tamanoUnion)
                 .conDetalle("palabrasComunes", interseccion.size() <= 40
-                        ? new ArrayList<>(interseccion) : List.of("(> 40 palabras, omitido)"))
-                .conDetalle("formula", "J(A,B) = |A ∩ B| / |A ∪ B|");
+                        ? interseccion : List.of("(> 40 palabras, omitido)"))
+                .conDetalle("formula", "J(A,B) = |A ∩ B| / |A ∪ B|,  |A ∪ B| = |A| + |B| - |A ∩ B|");
+    }
+
+    /**
+     * Recorre los tokens una vez y conserva solo la primera aparicion de
+     * cada palabra.
+     *
+     * @param tokens    tokens del abstract (con repeticiones)
+     * @param conjunto  tabla de pertenencia que se llena con las palabras distintas
+     * @return las palabras distintas, en orden de primera aparicion
+     */
+    private static List<String> construirConjunto(List<String> tokens, Set<String> conjunto) {
+        List<String> distintos = new ArrayList<>();
+        for (String token : tokens) {
+            if (!conjunto.contains(token)) {
+                conjunto.add(token);
+                distintos.add(token);
+            }
+        }
+        return distintos;
     }
 }

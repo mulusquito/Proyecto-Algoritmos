@@ -3,7 +3,7 @@
 Scripts usados **una sola vez**, de forma offline, para producir los archivos de datos que consume la
 aplicación (`app/src/main/resources/data/articulos.json` y `app/src/main/resources/embeddings/glove100_filtrado.tsv`).
 No se ejecutan como parte de la aplicación en tiempo de ejecución; se documentan aquí por transparencia del
-proceso (ver también `docs/DECLARACION_USO_IA.md`).
+proceso.
 
 ## Archivos
 

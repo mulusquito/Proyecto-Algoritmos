@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Utilidad de una sola ejecucion para generar, en formato tabla Markdown,
  * el ejemplo ilustrativo de las matrices de programacion dinamica que se
- * incluye en el documento tecnico (docs/DOCUMENTO_TECNICO.md). No forma
+ * incluye en el documento tecnico. No forma
  * parte de la aplicacion en si.
  */
 public class GenerarEjemploDocumentacion {

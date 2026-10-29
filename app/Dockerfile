@@ -1,6 +1,6 @@
 # --- Etapa 1: compilacion -------------------------------------------------
 # Se compila con Maven + JDK 17. El proyecto no tiene dependencias externas
-# (ver README.md / docs/DOCUMENTO_TECNICO.md), asi que esta etapa solo
+# (ver README.md), asi que esta etapa solo
 # necesita descargar los plugins basicos de Maven (compiler, jar) la primera
 # vez que se construye la imagen en un entorno con acceso normal a internet.
 FROM maven:3.9-eclipse-temurin-17 AS build

@@ -93,7 +93,8 @@ public class ClusteringJerarquico {
                     nodos.get(mejorI), nodos.get(mejorJ));
             int tamNuevo = tamI + tamJ;
 
-            pasos.add(new PasoFusion(mejorI, mejorJ, mejorDistancia, siguienteId, tamNuevo));
+            pasos.add(new PasoFusion(mejorI, mejorJ, mejorDistancia, siguienteId, tamNuevo,
+                    nodos.get(mejorI).getMiembros(), nodos.get(mejorJ).getMiembros()));
 
             // 3. Distancia del nuevo cluster a cada cluster M restante, con la formula
             //    de Lance-Williams del criterio de enlace elegido.

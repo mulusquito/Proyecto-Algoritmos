@@ -1,6 +1,7 @@
 package co.edu.uniquindio.bibliometria.clustering;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /** Registra una fusion de dos clusteres durante el algoritmo aglomerativo (una fila del "linkage matrix" clasico).  *
@@ -17,14 +18,21 @@ public class PasoFusion {
     public final int nuevoClusterId;
     /** Numero de articulos que contiene el cluster resultante. */
     public final int tamanoResultante;
+    /** Ids de los articulos del primer cluster. */
+    public final List<Integer> miembrosA;
+    /** Ids de los articulos del segundo cluster. */
+    public final List<Integer> miembrosB;
 
     /** Registra una fusion con todos sus datos. */
-    public PasoFusion(int clusterA, int clusterB, double altura, int nuevoClusterId, int tamanoResultante) {
+    public PasoFusion(int clusterA, int clusterB, double altura, int nuevoClusterId, int tamanoResultante,
+                      List<Integer> miembrosA, List<Integer> miembrosB) {
         this.clusterA = clusterA;
         this.clusterB = clusterB;
         this.altura = altura;
         this.nuevoClusterId = nuevoClusterId;
         this.tamanoResultante = tamanoResultante;
+        this.miembrosA = miembrosA;
+        this.miembrosB = miembrosB;
     }
 
     /** @return la fusion como mapa clave -> valor, listo para convertir a JSON */
@@ -35,6 +43,8 @@ public class PasoFusion {
         m.put("altura", altura);
         m.put("nuevoClusterId", nuevoClusterId);
         m.put("tamanoResultante", tamanoResultante);
+        m.put("miembrosA", miembrosA);
+        m.put("miembrosB", miembrosB);
         return m;
     }
 }

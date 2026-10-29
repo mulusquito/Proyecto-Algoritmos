@@ -18,6 +18,8 @@ public class ResultadoClustering {
     private final List<PasoFusion> pasos;
     /** Correlacion cofenetica del dendrograma (se asigna despues de evaluarlo). */
     private double correlacionCofenetica;
+    /** Cortes del dendrograma en k = 2..6 grupos: tamanos de los grupos y coeficiente de silueta. */
+    private List<Map<String, Object>> cortes = List.of();
 
     /** Crea el resultado con el dendrograma y sus pasos; la correlacion se asigna luego. */
     public ResultadoClustering(String nombreEnlace, NodoDendrograma raiz, List<PasoFusion> pasos) {
@@ -51,11 +53,22 @@ public class ResultadoClustering {
         this.correlacionCofenetica = correlacionCofenetica;
     }
 
+    /** @return los cortes del dendrograma en k grupos, con sus tamanos y silueta */
+    public List<Map<String, Object>> getCortes() {
+        return cortes;
+    }
+
+    /** Asigna los cortes calculados por {@code MotorClustering}. */
+    public void setCortes(List<Map<String, Object>> cortes) {
+        this.cortes = cortes;
+    }
+
     /** @return el resultado completo (dendrograma, pasos y evaluacion) como mapa para JSON */
     public Map<String, Object> aMapa() {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("nombreEnlace", nombreEnlace);
         m.put("correlacionCofenetica", correlacionCofenetica);
+        m.put("cortes", cortes);
         m.put("dendrograma", raiz.aMapa());
         m.put("pasos", pasos.stream().map(PasoFusion::aMapa).collect(Collectors.toList()));
         return m;

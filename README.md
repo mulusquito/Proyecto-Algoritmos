@@ -6,15 +6,19 @@ Implementación, **desde cero** (sin funciones de alto nivel de similitud/cluste
 textual sobre un corpus de 20 artículos científicos sobre Inteligencia Artificial en Educación, con enfoque en:
 
 - **Requerimiento 1 — Similitud textual**: 4 algoritmos clásicos (Levenshtein, Needleman-Wunsch, Similitud del
-  Coseno con TF-IDF, Coeficiente de Jaccard) + 2 algoritmos basados en Inteligencia Artificial (Similitud del
-  Coseno y Distancia Euclidiana sobre *embeddings* preentrenados GloVe).
+  Coseno con TF-IDF, Coeficiente de Jaccard) + 2 algoritmos basados en Inteligencia Artificial, uno por cada
+  modelo de *embeddings* preentrenado (GloVe 100d y FastText 300d), comparados con similitud del coseno y distancia
+  euclidiana. Permite seleccionar dos o más artículos.
 - **Requerimiento 2 — Agrupamiento jerárquico**: 3 algoritmos de clustering (Single, Complete y Average Linkage)
   construidos desde cero, con dendrogramas y evaluación mediante el Coeficiente de Correlación Cofenética.
+- **Requerimiento 3 — Búsqueda de patrones**: coincidencia exacta de cadenas en los 20 abstracts con
+  Knuth-Morris-Pratt, Boyer-Moore (carácter malo y sufijo bueno) y Rabin-Karp (rolling hash), sin `indexOf`/`find`,
+  con medición separada de los tiempos de preprocesamiento y de búsqueda y traza paso a paso.
 - **Seguimiento — Ranking de términos**: los términos más frecuentes de los 20 abstracts, ordenados con 3
   algoritmos no basados en comparaciones (Counting Sort, Radix Sort y Bucket Sort), con medición de tiempos en
   milisegundos y validación del top 15.
-- **Aplicación web desplegable** que permite explorar el corpus, comparar artículos y visualizar los
-  dendrogramas interactivamente.
+- **Aplicación web desplegable** que permite explorar el corpus, comparar artículos, visualizar los
+  dendrogramas y buscar patrones de texto interactivamente.
 
 ## Estructura del repositorio
 
@@ -28,8 +32,7 @@ textual sobre un corpus de 20 artículos científicos sobre Inteligencia Artific
 ├── extraction/              Scripts usados para extraer y curar los abstracts/metadatos de los 20 PDFs
 ├── recursos/articulos-originales/   Los 20 PDFs originales suministrados por el docente
 ├── docs/
-│   ├── DOCUMENTO_TECNICO.md         Documento de diseño, arquitectura y análisis por requerimiento
-│   ├── DECLARACION_USO_IA.md        Declaración explícita del uso de IA generativa como apoyo
+│   ├── imagenes/                    Diagrama de clases y dendrogramas (generados con el código)
 │   └── enunciado/Proyecto Algoritmos.pdf
 └── README.md
 ```
@@ -74,8 +77,9 @@ java -cp target/test-classes co.edu.uniquindio.bibliometria.PruebasAlgoritmos
 
 ## Despliegue
 
-Ver `app/Dockerfile` y la sección "Despliegue" del [documento técnico](docs/DOCUMENTO_TECNICO.md#9-despliegue)
-para instrucciones detalladas de despliegue en Render/Railway.
+La aplicación se empaqueta con `app/Dockerfile` (compilación con Maven y ejecución con un JRE liviano) y puede
+desplegarse en cualquier plataforma que soporte contenedores (Render, Railway, Fly.io, etc.). En Render: crear un
+"Web Service" con entorno Docker y directorio raíz `app/`; el puerto se toma de la variable de entorno `PORT`.
 
 ## Flujo de ramas de Git
 
@@ -89,6 +93,5 @@ hacia `develop`, y cuando el trabajo esté listo para producción, fusionar `dev
 
 ## Uso de Inteligencia Artificial generativa
 
-Este proyecto usó IA generativa (Claude, Anthropic) como apoyo durante el desarrollo. El alcance exacto de ese
-apoyo, y la declaración explícita exigida por el enunciado del proyecto, están documentados en
-[docs/DECLARACION_USO_IA.md](docs/DECLARACION_USO_IA.md).
+Este proyecto usó herramientas de IA generativa como apoyo durante el desarrollo. La declaración explícita de ese
+uso, exigida por el enunciado del proyecto, se entrega junto con la documentación del curso.

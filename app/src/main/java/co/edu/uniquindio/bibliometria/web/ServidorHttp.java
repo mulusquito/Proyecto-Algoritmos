@@ -1,5 +1,7 @@
 package co.edu.uniquindio.bibliometria.web;
 
+import co.edu.uniquindio.bibliometria.busqueda.MotorBusqueda;
+import co.edu.uniquindio.bibliometria.busqueda.RabinKarp;
 import co.edu.uniquindio.bibliometria.clustering.MotorClustering;
 import co.edu.uniquindio.bibliometria.clustering.ResultadoClustering;
 import co.edu.uniquindio.bibliometria.datos.RepositorioArticulos;
@@ -43,6 +45,7 @@ import java.util.stream.Collectors;
  *     <li>{@code GET /api/articulos} y {@code GET /api/articulos/{id}}</li>
  *     <li>{@code GET /api/similitud?idA=..&idB=..} (Requerimiento 1)</li>
  *     <li>{@code GET /api/clustering} (Requerimiento 2)</li>
+ *     <li>{@code GET /api/busqueda?patron=..} (Requerimiento 3)</li>
  *     <li>{@code GET /api/ranking?top=15&repeticiones=50} (Seguimiento: ranking de terminos)</li>
  *     <li>Archivos estaticos del frontend (carpeta {@code static/})</li>
  * </ul>
@@ -58,6 +61,7 @@ public class ServidorHttp {
     private final MotorSimilitud motorSimilitud;
     private final MotorClustering motorClustering;
     private final MotorRanking motorRanking;
+    private final MotorBusqueda motorBusqueda;
 
     /**
      * Crea el servidor y registra cada ruta con su manejador. No empieza a
@@ -68,11 +72,12 @@ public class ServidorHttp {
      */
     public ServidorHttp(int puerto, RepositorioArticulos repositorioArticulos,
                          MotorSimilitud motorSimilitud, MotorClustering motorClustering,
-                         MotorRanking motorRanking) throws IOException {
+                         MotorRanking motorRanking, MotorBusqueda motorBusqueda) throws IOException {
         this.repositorioArticulos = repositorioArticulos;
         this.motorSimilitud = motorSimilitud;
         this.motorClustering = motorClustering;
         this.motorRanking = motorRanking;
+        this.motorBusqueda = motorBusqueda;
 
         this.servidor = HttpServer.create(new InetSocketAddress(puerto), 0);
         // Rutas de la API. La ruta "/" va al final y atiende todo lo demas (archivos del frontend).
@@ -80,6 +85,7 @@ public class ServidorHttp {
         servidor.createContext("/api/similitud", conManejoDeErrores(this::manejarSimilitud));
         servidor.createContext("/api/clustering", conManejoDeErrores(this::manejarClustering));
         servidor.createContext("/api/ranking", conManejoDeErrores(this::manejarRanking));
+        servidor.createContext("/api/busqueda", conManejoDeErrores(this::manejarBusqueda));
         servidor.createContext("/", conManejoDeErrores(this::manejarEstatico));
         // Hasta 8 peticiones atendidas al mismo tiempo.
         servidor.setExecutor(Executors.newFixedThreadPool(8));
@@ -165,8 +171,12 @@ public class ServidorHttp {
     }
 
     /**
-     * {@code GET /api/similitud?idA=1&idB=2} (Requerimiento 1): valida que
-     * los dos ids existan y sean distintos, ejecuta los 6 algoritmos y
+     * {@code GET /api/similitud?ids=1,2,5} (Requerimiento 1): compara dos o
+     * mas articulos. Valida que los ids existan y no se repitan, ejecuta los 6
+     * algoritmos sobre cada par y devuelve los articulos, los resultados de
+     * cada par y una matriz de similitud por algoritmo.
+     * <p>
+     * Tambien acepta la forma {@code ?idA=1&idB=2} para un solo par, que
      * devuelve los dos articulos con los 6 resultados. Responde 400 si faltan
      * parametros o no son validos.
      */
@@ -176,6 +186,10 @@ public class ServidorHttp {
             return;
         }
         Map<String, String> query = parsearQuery(exchange.getRequestURI().getRawQuery());
+        if (query.containsKey("ids")) {
+            manejarSimilitudVarios(exchange, query.get("ids"));
+            return;
+        }
         try {
             // Si falta un parametro, parseInt(null) lanza NumberFormatException y se responde 400.
             int idA = Integer.parseInt(query.get("idA"));
@@ -201,8 +215,43 @@ public class ServidorHttp {
             respuesta.put("resultados", resultados.stream().map(ResultadoSimilitud::aMapa).collect(Collectors.toList()));
             responderJson(exchange, 200, respuesta);
         } catch (NumberFormatException | NullPointerException e) {
-            responderJson(exchange, 400, Map.of("error", "Parametros invalidos. Uso: /api/similitud?idA=1&idB=2"));
+            responderJson(exchange, 400, Map.of("error", "Parametros invalidos. Uso: /api/similitud?ids=1,2,5"));
         }
+    }
+
+    /** Comparacion de dos o mas articulos ({@code ids} separados por comas). */
+    private void manejarSimilitudVarios(HttpExchange exchange, String idsTexto) throws IOException {
+        List<Articulo> seleccionados = new java.util.ArrayList<>();
+        try {
+            for (String parte : idsTexto.split(",")) {
+                if (parte.isBlank()) continue;
+                int id = Integer.parseInt(parte.trim());
+                Optional<Articulo> articulo = repositorioArticulos.buscarPorId(id);
+                if (articulo.isEmpty()) {
+                    responderJson(exchange, 400, Map.of("error",
+                            "El articulo " + id + " no existe (ids validos: 1-" + repositorioArticulos.total() + ")"));
+                    return;
+                }
+                if (seleccionados.contains(articulo.get())) {
+                    responderJson(exchange, 400, Map.of("error", "El articulo " + id + " esta repetido"));
+                    return;
+                }
+                seleccionados.add(articulo.get());
+            }
+        } catch (NumberFormatException e) {
+            responderJson(exchange, 400, Map.of("error", "Parametros invalidos. Uso: /api/similitud?ids=1,2,5"));
+            return;
+        }
+        if (seleccionados.size() < 2) {
+            responderJson(exchange, 400, Map.of("error", "Selecciona al menos dos articulos"));
+            return;
+        }
+
+        Map<String, Object> respuesta = new LinkedHashMap<>();
+        respuesta.put("articulos", seleccionados.stream().map(a -> new ArticuloDTOSalida(a).aMapa())
+                .collect(Collectors.toList()));
+        respuesta.putAll(motorSimilitud.compararVarios(seleccionados));
+        responderJson(exchange, 200, respuesta);
     }
 
     /**
@@ -250,6 +299,40 @@ public class ServidorHttp {
             responderJson(exchange, 200, motorRanking.ejecutarComoMapa(top, repeticiones));
         } catch (NumberFormatException e) {
             responderJson(exchange, 400, Map.of("error", "Parametros invalidos. Uso: /api/ranking?top=15&repeticiones=50"));
+        }
+    }
+
+    /**
+     * {@code GET /api/busqueda?patron=algorithm&mayusculas=false&modulo=1000000007&traza=1&repeticiones=50}
+     * (Requerimiento 3): busca el patron en los 20 abstracts con KMP,
+     * Boyer-Moore y Rabin-Karp. Solo {@code patron} es obligatorio;
+     * {@code traza} es el id del articulo cuya traza paso a paso se devuelve.
+     */
+    private void manejarBusqueda(HttpExchange exchange) throws IOException {
+        if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+            responderJson(exchange, 405, Map.of("error", "Metodo no soportado"));
+            return;
+        }
+        Map<String, String> query = parsearQuery(exchange.getRequestURI().getRawQuery());
+        String patron = query.get("patron");
+        if (patron == null || patron.isEmpty() || patron.length() > MotorBusqueda.LONGITUD_MAXIMA_PATRON) {
+            responderJson(exchange, 400, Map.of("error",
+                    "Indica un patron de 1 a " + MotorBusqueda.LONGITUD_MAXIMA_PATRON + " caracteres. Uso: /api/busqueda?patron=learning"));
+            return;
+        }
+        try {
+            boolean distinguirMayusculas = Boolean.parseBoolean(query.getOrDefault("mayusculas", "false"));
+            long modulo = Long.parseLong(query.getOrDefault("modulo", String.valueOf(RabinKarp.MODULO_POR_DEFECTO)));
+            int repeticiones = Integer.parseInt(query.getOrDefault("repeticiones",
+                    String.valueOf(MotorBusqueda.REPETICIONES_POR_DEFECTO)));
+            Integer traza = query.containsKey("traza") ? Integer.valueOf(query.get("traza")) : null;
+            if (modulo < 2 || modulo > 2_000_000_000L || repeticiones < 1 || repeticiones > 500) {
+                responderJson(exchange, 400, Map.of("error", "Rangos validos: modulo 2-2000000000, repeticiones 1-500"));
+                return;
+            }
+            responderJson(exchange, 200, motorBusqueda.buscar(patron, distinguirMayusculas, modulo, traza, repeticiones));
+        } catch (NumberFormatException e) {
+            responderJson(exchange, 400, Map.of("error", "Parametros invalidos. Uso: /api/busqueda?patron=learning&traza=1"));
         }
     }
 

@@ -27,9 +27,14 @@ public class VectorizadorEmbeddings {
         this.repositorio = repositorio;
     }
 
+    /** @return el modelo de embeddings que usa este vectorizador */
+    public RepositorioEmbeddings getRepositorio() {
+        return repositorio;
+    }
+
     /** Vector de un documento completo junto con su cobertura de vocabulario. */
     public static class VectorDocumento {
-        /** Promedio de los vectores de las palabras encontradas (100 componentes). */
+        /** Promedio de los vectores de las palabras encontradas (tantas componentes como el modelo). */
         public final double[] vector;
         /** Cuantas palabras del documento tenian vector en el modelo. */
         public final int palabrasEncontradas;
@@ -47,12 +52,12 @@ public class VectorizadorEmbeddings {
     /**
      * Promedia los vectores de embedding de las palabras de un documento.
      *
-     * @param tokens tokens del documento (sin estemizar, para hacer match con el vocabulario de GloVe)
+     * @param tokens tokens del documento (sin estemizar, para hacer match con el vocabulario del modelo)
      * @return vector promedio junto con estadisticas de cobertura (palabras encontradas / totales)
      */
     public VectorDocumento vectorizar(List<String> tokens) {
         // 1. Sumar componente a componente los vectores de las palabras que existen en el modelo.
-        double[] suma = new double[RepositorioEmbeddings.DIMENSIONES];
+        double[] suma = new double[repositorio.getDimensiones()];
         int encontradas = 0;
         for (String token : tokens) {
             double[] v = repositorio.obtenerVector(token);
