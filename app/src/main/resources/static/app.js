@@ -11,8 +11,9 @@ let RANKING_CARGADO = false;      // si ya se midio el ranking al menos una vez
 
 // Al terminar de cargar el HTML: activar pestanas y botones, y traer el corpus.
 document.addEventListener("DOMContentLoaded", () => {
-    configurarTabs();
+    configurarNavegacion();
     configurarTabsClustering();
+    configurarDocumentos();
     ejecutarConAviso(cargarArticulos, "tabla-articulos");
     document.getElementById("btn-comparar").addEventListener("click", () => ejecutarConAviso(ejecutarComparacion, "resultado-similitud"));
     document.getElementById("btn-medir").addEventListener("click", () => ejecutarConAviso(cargarRanking, "resumen-ranking"));
@@ -39,24 +40,89 @@ function mostrarError(idContenedor, error) {
 }
 
 // ------------------------------------------------------------
-// Navegacion por pestanas
+// Navegacion entre vistas
 // ------------------------------------------------------------
-// Activa la navegacion entre pestanas principales. La primera vez que se abre Clustering o Ranking se piden sus datos al servidor (carga perezosa).
-function configurarTabs() {
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("activo"));
-            document.querySelectorAll(".tab-contenido").forEach(s => s.classList.remove("activo"));
-            btn.classList.add("activo");
-            document.getElementById("tab-" + btn.dataset.tab).classList.add("activo");
-            if (btn.dataset.tab === "clustering" && !CLUSTERING_RESPUESTA) {
-                ejecutarConAviso(cargarClustering, "resumen-clustering");
-            }
-            if (btn.dataset.tab === "ranking" && !RANKING_CARGADO) {
-                ejecutarConAviso(cargarRanking, "resumen-ranking");
-            }
-        });
+// Cada vista tiene su direccion (#inicio, #requerimientos, #clustering, ...): asi funcionan el boton "atras"
+// del navegador y la recarga de la pagina. Sin direccion se abre la vista de Inicio.
+const VISTA_INICIAL = "inicio";
+
+function configurarNavegacion() {
+    // Menu superior, tarjetas de Inicio, tarjetas de los submenus, botones "volver" y R1/R2/R3.
+    document.querySelectorAll("[data-vista], [data-ir]").forEach(boton => {
+        boton.addEventListener("click", () => irA(boton.dataset.vista || boton.dataset.ir));
     });
+    window.addEventListener("hashchange", () => mostrarVista(vistaDeLaDireccion()));
+    mostrarVista(vistaDeLaDireccion());
+}
+
+function irA(vista) {
+    if (location.hash === "#" + vista) {
+        mostrarVista(vista);
+    } else {
+        location.hash = vista;   // dispara "hashchange", que muestra la vista
+    }
+}
+
+function vistaDeLaDireccion() {
+    const nombre = location.hash.replace("#", "");
+    return document.getElementById("vista-" + nombre) ? nombre : VISTA_INICIAL;
+}
+
+// Muestra una vista y marca en el menu su opcion (o la de su seccion padre: R1, R2 y R3 estan dentro de
+// Requerimientos y el ranking dentro de Seguimiento). La primera vez que se abre el clustering o el ranking
+// se piden sus datos al servidor (carga perezosa).
+function mostrarVista(nombre) {
+    const vista = document.getElementById("vista-" + nombre);
+    document.querySelectorAll(".vista").forEach(v => v.classList.toggle("activo", v === vista));
+    const opcionMenu = vista.dataset.padre || nombre;
+    document.querySelectorAll(".menu-btn").forEach(b => b.classList.toggle("activo", b.dataset.vista === opcionMenu));
+    window.scrollTo({ top: 0 });
+    if (nombre === "clustering" && !CLUSTERING_RESPUESTA) {
+        ejecutarConAviso(cargarClustering, "resumen-clustering");
+    }
+    if (nombre === "ranking" && !RANKING_CARGADO) {
+        ejecutarConAviso(cargarRanking, "resumen-ranking");
+    }
+}
+
+// ------------------------------------------------------------
+// Documentos (PDF)
+// ------------------------------------------------------------
+// "Ver" abre el PDF en un visor dentro de la pagina; si el archivo no esta disponible en esta instalacion
+// (los PDF no forman parte del repositorio), se avisa en lugar de mostrar un visor vacio.
+function configurarDocumentos() {
+    document.querySelectorAll(".documento").forEach(doc => {
+        const archivo = doc.dataset.archivo;
+        doc.querySelector('[data-accion="ver"]').addEventListener("click", () => ejecutarConAviso(() => verDocumento(doc), "visor-documento"));
+        fetch(archivo, { method: "HEAD" })
+            .then(r => { if (!r.ok) marcarDocumentoNoDisponible(doc); })
+            .catch(() => marcarDocumentoNoDisponible(doc));
+    });
+}
+
+async function verDocumento(doc) {
+    const visor = document.getElementById("visor-documento");
+    const titulo = doc.querySelector("strong").textContent;
+    document.querySelectorAll(".documento").forEach(d => d.classList.toggle("abierto", d === doc));
+    const respuesta = await fetch(doc.dataset.archivo, { method: "HEAD" });
+    if (!respuesta.ok) {
+        marcarDocumentoNoDisponible(doc);
+        visor.innerHTML = `<p class="nota">El documento "${escaparHtml(titulo)}" no está disponible en esta instalación.</p>`;
+        return;
+    }
+    visor.innerHTML = `<div class="visor-cabecera"><strong>${escaparHtml(titulo)}</strong>
+        <button class="btn-ver" id="btn-cerrar-visor">Cerrar</button></div>
+        <iframe class="visor-pdf" src="${doc.dataset.archivo}" title="${escaparHtml(titulo)}"></iframe>`;
+    document.getElementById("btn-cerrar-visor").addEventListener("click", () => {
+        visor.innerHTML = "";
+        doc.classList.remove("abierto");
+    });
+    visor.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function marcarDocumentoNoDisponible(doc) {
+    doc.classList.add("no-disponible");
+    doc.querySelector(".documento-texto span").textContent += " — no disponible en esta instalación";
 }
 
 // Botones Single / Complete / Average: cambian el dendrograma que se dibuja sin volver a pedir datos.

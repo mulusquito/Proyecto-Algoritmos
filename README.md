@@ -85,11 +85,13 @@ desplegarse en cualquier plataforma que soporte contenedores (Render, Railway, F
 
 | Rama | Propósito |
 |---|---|
-| `main` | Rama de **despliegue**: siempre refleja la versión estable que está (o puede ser) desplegada. |
+| `despliegue` | Rama de **despliegue**: la plataforma de hosting (Render, Railway, etc.) se conecta a esta rama y publica lo que contiene. Solo recibe versiones ya revisadas desde `main`. |
+| `main` | Rama **principal**: siempre refleja la versión estable e integrada del proyecto. |
 | `develop` | Rama de **desarrollo**: donde se integran los cambios en curso antes de promoverlos a `main`. |
 
 Flujo de trabajo sugerido: crear ramas de feature a partir de `develop` (`feature/nombre`), abrir Pull Request
-hacia `develop`, y cuando el trabajo esté listo para producción, fusionar `develop` en `main`.
+hacia `develop`; cuando el trabajo esté listo, fusionar `develop` en `main`, y para publicar una versión, llevar
+`main` a `despliegue`.
 
 ## Uso de Inteligencia Artificial generativa
 

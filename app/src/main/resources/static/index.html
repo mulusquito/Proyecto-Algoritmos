@@ -7,29 +7,188 @@
 <link rel="stylesheet" href="/estilos.css">
 </head>
 <body>
-<header>
-    <h1>Análisis de Algoritmos en el Contexto de la Bibliometría</h1>
-    <p class="subtitulo">Universidad del Quindío &middot; Programa de Ingeniería de Sistemas y Computación</p>
-    <nav>
-        <button class="tab-btn activo" data-tab="corpus">Corpus (20 artículos)</button>
-        <button class="tab-btn" data-tab="similitud">Requerimiento 1 · Similitud textual</button>
-        <button class="tab-btn" data-tab="clustering">Requerimiento 2 · Clustering jerárquico</button>
-        <button class="tab-btn" data-tab="busqueda">Requerimiento 3 · Búsqueda de patrones</button>
-        <button class="tab-btn" data-tab="ranking">Seguimiento · Ranking de términos</button>
-        <button class="tab-btn" data-tab="acerca">Acerca del proyecto</button>
+
+<!-- Iconos (dibujos de linea reutilizables con <use href="#i-...">) -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <symbol id="i-inicio" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-integrantes" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14.6c2.6.2 4.4 1.9 5 4.9"/></symbol>
+    <symbol id="i-acerca" viewBox="0 0 24 24"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3v5h5M8.5 13h7M8.5 16.5h7M8.5 9.5h2.5"/></symbol>
+    <symbol id="i-corpus" viewBox="0 0 24 24"><path d="M2.5 5h6A3.5 3.5 0 0 1 12 8.5V20a2.5 2.5 0 0 0-2.5-2.5h-7zM21.5 5h-6A3.5 3.5 0 0 0 12 8.5V20a2.5 2.5 0 0 1 2.5-2.5h7z"/></symbol>
+    <symbol id="i-requerimientos" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4.5" cy="6" r="1.4"/><circle cx="4.5" cy="12" r="1.4"/><circle cx="4.5" cy="18" r="1.4"/></symbol>
+    <symbol id="i-seguimiento" viewBox="0 0 24 24"><path d="M3 18l6-6 4 4 8-8"/><path d="M15 8h6v6"/></symbol>
+    <symbol id="i-documentos" viewBox="0 0 24 24"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3v5h5"/><path d="M9 15.5h6"/></symbol>
+    <symbol id="i-flecha" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-volver" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+    <symbol id="i-similitud" viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="12" rx="1.5"/><rect x="13" y="8" width="8" height="12" rx="1.5"/><path d="M6 8h2M6 11h2M16 12h2M16 15h2"/></symbol>
+    <symbol id="i-arbol" viewBox="0 0 24 24"><path d="M12 4v5M6 9h12M6 9v4M18 9v4M3 13h6M15 13h6M3 13v5M9 13v5M15 13v5M21 13v5"/></symbol>
+    <symbol id="i-buscar" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l6 6"/></symbol>
+    <symbol id="i-ver" viewBox="0 0 24 24"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-descargar" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></symbol>
+    <symbol id="i-logo" viewBox="0 0 48 48"><path d="M4 9h13a7 7 0 0 1 7 7v24a5 5 0 0 0-5-5H4zM44 9H31a7 7 0 0 0-7 7v24a5 5 0 0 1 5-5h15z"/><path d="M30 29v-5M35 29v-9M40 29v-12"/><circle cx="12" cy="21" r="3.5"/><path d="M14.5 23.5 18 27"/></symbol>
+</svg>
+
+<header class="encabezado">
+    <div class="encabezado-marca">
+        <svg class="logo" aria-hidden="true"><use href="#i-logo"/></svg>
+        <div>
+            <h1>Análisis de <span class="acento">Algoritmos</span> en el Contexto de la <span class="acento">Bibliometría</span></h1>
+            <p class="subtitulo">Universidad del Quindío &middot; Programa de Ingeniería de Sistemas y Computación</p>
+        </div>
+    </div>
+    <nav class="menu" aria-label="Secciones">
+        <button class="menu-btn" data-vista="inicio"><svg><use href="#i-inicio"/></svg>Inicio</button>
+        <button class="menu-btn" data-vista="integrantes"><svg><use href="#i-integrantes"/></svg>Integrantes</button>
+        <button class="menu-btn" data-vista="acerca"><svg><use href="#i-acerca"/></svg>Acerca del proyecto</button>
+        <button class="menu-btn" data-vista="corpus"><svg><use href="#i-corpus"/></svg>Corpus documental</button>
+        <button class="menu-btn" data-vista="requerimientos"><svg><use href="#i-requerimientos"/></svg>Requerimientos</button>
+        <button class="menu-btn" data-vista="seguimiento"><svg><use href="#i-seguimiento"/></svg>Seguimiento</button>
+        <button class="menu-btn" data-vista="documentos"><svg><use href="#i-documentos"/></svg>Documentos</button>
     </nav>
 </header>
 
 <main>
+    <!-- ================= INICIO ================= -->
+    <section id="vista-inicio" class="vista">
+        <div class="portada">
+            <div class="portada-texto">
+                <h2 class="titulo-bienvenida">¡Bienvenido al proyecto!</h2>
+                <p>Este espacio reúne el análisis de algoritmos aplicados al contexto de la bibliometría: procesamos los
+                abstracts de 20 artículos científicos sobre inteligencia artificial en educación para comparar su similitud,
+                agruparlos por afinidad, buscar patrones de texto y ordenar sus términos más frecuentes, con algoritmos
+                implementados desde cero.</p>
+                <blockquote class="frase">
+                    <p>«Detrás de cada dato hay una historia; los algoritmos nos ayudan a contarla.»</p>
+                </blockquote>
+                <div class="cifras">
+                    <div><strong>20</strong><span>artículos</span></div>
+                    <div><strong>3</strong><span>requerimientos</span></div>
+                    <div><strong>15</strong><span>algoritmos</span></div>
+                </div>
+            </div>
+            <div class="portada-ilustracion" aria-hidden="true">
+                <svg viewBox="0 0 420 300">
+                    <defs>
+                        <linearGradient id="g-pantalla" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eaf3ff"/><stop offset="1" stop-color="#d4e6fb"/></linearGradient>
+                        <linearGradient id="g-barra" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b8de0"/><stop offset="1" stop-color="#1f5fa8"/></linearGradient>
+                    </defs>
+                    <circle cx="70" cy="60" r="4" fill="#9cc6f2"/><circle cx="380" cy="40" r="6" fill="#bcd9f7"/><circle cx="395" cy="250" r="4" fill="#9cc6f2"/>
+                    <rect x="300" y="18" width="70" height="52" rx="8" fill="#fff" stroke="#9cc6f2" stroke-width="2"/>
+                    <path d="M312 34h46M312 44h34M312 54h40" stroke="#9cc6f2" stroke-width="4" stroke-linecap="round"/>
+                    <rect x="22" y="110" width="60" height="70" rx="8" fill="#fff" stroke="#9cc6f2" stroke-width="2"/>
+                    <path d="M34 128h36M34 140h28M34 152h32M34 164h20" stroke="#bcd9f7" stroke-width="4" stroke-linecap="round"/>
+                    <rect x="95" y="60" width="240" height="160" rx="12" fill="#1f3a5f"/>
+                    <rect x="107" y="72" width="216" height="136" rx="6" fill="url(#g-pantalla)"/>
+                    <rect x="125" y="160" width="22" height="36" rx="3" fill="url(#g-barra)" opacity=".55"/>
+                    <rect x="155" y="138" width="22" height="58" rx="3" fill="url(#g-barra)" opacity=".7"/>
+                    <rect x="185" y="118" width="22" height="78" rx="3" fill="url(#g-barra)" opacity=".85"/>
+                    <rect x="215" y="96" width="22" height="100" rx="3" fill="url(#g-barra)"/>
+                    <path d="M125 150l30-18 30-14 30-20 30-12" fill="none" stroke="#f0a73a" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="275" cy="118" r="20" fill="none" stroke="#3b8de0" stroke-width="10" stroke-dasharray="70 56" transform="rotate(-90 275 118)"/>
+                    <circle cx="275" cy="118" r="20" fill="none" stroke="#9cc6f2" stroke-width="10" stroke-dasharray="56 70" stroke-dashoffset="-70" transform="rotate(-90 275 118)"/>
+                    <path d="M70 220h290l-18 22H88z" fill="#2c4f7c"/><rect x="190" y="222" width="50" height="5" rx="2.5" fill="#1f3a5f"/>
+                    <circle cx="330" cy="180" r="34" fill="rgba(255,255,255,.55)" stroke="#1f3a5f" stroke-width="9"/>
+                    <path d="M354 205l30 30" stroke="#1f3a5f" stroke-width="13" stroke-linecap="round"/>
+                    <path d="M316 178l10 10 18-22" fill="none" stroke="#1e7d4f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <h3 class="titulo-seccion">Explora el proyecto</h3>
+        <div class="tarjetas-inicio">
+            <button class="tarjeta-inicio color-1" data-ir="integrantes"><svg><use href="#i-integrantes"/></svg>
+                <strong>Integrantes</strong><span>Conoce al equipo del proyecto</span><svg class="flecha"><use href="#i-flecha"/></svg></button>
+            <button class="tarjeta-inicio color-2" data-ir="acerca"><svg><use href="#i-acerca"/></svg>
+                <strong>Acerca del proyecto</strong><span>Objetivos, alcance y metodología</span><svg class="flecha"><use href="#i-flecha"/></svg></button>
+            <button class="tarjeta-inicio color-3" data-ir="corpus"><svg><use href="#i-corpus"/></svg>
+                <strong>Corpus documental</strong><span>Los 20 artículos científicos</span><svg class="flecha"><use href="#i-flecha"/></svg></button>
+            <button class="tarjeta-inicio color-4" data-ir="requerimientos"><svg><use href="#i-requerimientos"/></svg>
+                <strong>Requerimientos</strong><span>R1, R2 y R3 con sus soluciones</span><svg class="flecha"><use href="#i-flecha"/></svg></button>
+            <button class="tarjeta-inicio color-5" data-ir="seguimiento"><svg><use href="#i-seguimiento"/></svg>
+                <strong>Seguimiento</strong><span>Ranking de términos</span><svg class="flecha"><use href="#i-flecha"/></svg></button>
+            <button class="tarjeta-inicio color-6" data-ir="documentos"><svg><use href="#i-documentos"/></svg>
+                <strong>Documentos</strong><span>PDF del seguimiento</span><svg class="flecha"><use href="#i-flecha"/></svg></button>
+        </div>
+    </section>
+
+    <!-- ================= INTEGRANTES ================= -->
+    <section id="vista-integrantes" class="vista">
+        <h2>Integrantes</h2>
+        <p>Equipo que desarrolló el proyecto <em>"Análisis de algoritmos en el contexto de la bibliometría"</em>.</p>
+        <div class="integrantes">
+            <div class="integrante">
+                <img class="burbuja" src="/img/integrantes/melissa.jpg" alt="Foto de Melissa Restrepo Hurtado">
+                <div><strong>Melissa Restrepo Hurtado</strong><span>Ingeniería de Sistemas y Computación</span></div>
+            </div>
+            <div class="integrante">
+                <img class="burbuja" src="/img/integrantes/alfonso.jpg" alt="Foto de Alfonso Ocampo Montealegre">
+                <div><strong>Alfonso Ocampo Montealegre</strong><span>Ingeniería de Sistemas y Computación</span></div>
+            </div>
+            <div class="integrante">
+                <img class="burbuja" src="/img/integrantes/camila.jpg" alt="Foto de Camila Ramírez Galvis">
+                <div><strong>Camila Ramírez Galvis</strong><span>Ingeniería de Sistemas y Computación</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= ACERCA ================= -->
+    <section id="vista-acerca" class="vista">
+        <h2>Acerca del proyecto</h2>
+        <p>Esta aplicación implementa, desde cero (sin funciones de alto nivel que resuelvan directamente cada problema), los algoritmos exigidos
+        por el proyecto del curso <em>"Análisis de algoritmos en el contexto de la bibliometría"</em> de la Universidad del Quindío. Trabaja sobre
+        un corpus controlado de 20 artículos científicos sobre inteligencia artificial en educación y procesa el <em>abstract</em> de cada uno.</p>
+        <div class="tarjetas-acerca">
+            <div class="tarjeta-acerca"><strong>Requerimiento 1 · Similitud textual</strong>
+                <p>Levenshtein, Needleman-Wunsch, similitud del coseno con TF-IDF y coeficiente de Jaccard (algoritmos clásicos), y dos enfoques
+                de embeddings preentrenados, GloVe 100d y FastText 300d, comparados con similitud del coseno y distancia euclidiana (algoritmos de IA).</p></div>
+            <div class="tarjeta-acerca"><strong>Requerimiento 2 · Agrupamiento jerárquico</strong>
+                <p>Clustering aglomerativo con enlace simple, completo y promedio (UPGMA), dendrograma de cada criterio y evaluación con dos métricas
+                internas: correlación cofenética y coeficiente de silueta.</p></div>
+            <div class="tarjeta-acerca"><strong>Requerimiento 3 · Búsqueda de patrones</strong>
+                <p>Knuth-Morris-Pratt, Boyer-Moore (carácter malo y sufijo bueno) y Rabin-Karp (rolling hash), con medición separada de los tiempos
+                de preprocesamiento y de búsqueda.</p></div>
+            <div class="tarjeta-acerca"><strong>Seguimiento · Ranking de términos</strong>
+                <p>Los términos más frecuentes del corpus, ordenados con Counting Sort, Radix Sort y Bucket Sort, con medición de tiempos en milisegundos.</p></div>
+        </div>
+        <h3 class="titulo-seccion">Metodología</h3>
+        <p>Cada requerimiento sigue el mismo proceso: preprocesamiento de los abstracts (normalización, tokenización, eliminación de stopwords y,
+        según el algoritmo, stemming), implementación explícita de cada algoritmo con estructuras básicas del lenguaje, verificación con pruebas
+        automáticas contra casos de referencia y oráculos independientes, y análisis de complejidad contrastado con mediciones reales.</p>
+        <p>El backend es una aplicación Java (JDK 17+) sin dependencias externas: usa <code>com.sun.net.httpserver</code> para la API REST y un
+        parser/escritor JSON propio. El uso de herramientas de IA generativa como apoyo al desarrollo se declara explícitamente en la documentación
+        entregada del proyecto.</p>
+    </section>
+
     <!-- ================= CORPUS ================= -->
-    <section id="tab-corpus" class="tab-contenido activo">
+    <section id="vista-corpus" class="vista">
         <h2>Corpus documental (20 abstracts)</h2>
         <p>Artículos científicos suministrados como fuente de información. Solo se procesa computacionalmente el <em>abstract</em> de cada uno.</p>
         <div id="tabla-articulos" class="cargando">Cargando artículos...</div>
     </section>
 
-    <!-- ================= SIMILITUD ================= -->
-    <section id="tab-similitud" class="tab-contenido">
+    <!-- ================= REQUERIMIENTOS (menu) ================= -->
+    <section id="vista-requerimientos" class="vista">
+        <h2>Requerimientos</h2>
+        <p>Elige un requerimiento para ver su solución.</p>
+        <div class="tarjetas-submenu">
+            <button class="tarjeta-submenu color-2" data-ir="similitud"><svg><use href="#i-similitud"/></svg>
+                <span class="etiqueta">Requerimiento 1</span><strong>Similitud textual</strong>
+                <span>Compara dos o más abstracts con 4 algoritmos clásicos y 2 basados en IA (GloVe y FastText).</span>
+                <span class="ir">Ver solución <svg><use href="#i-flecha"/></svg></span></button>
+            <button class="tarjeta-submenu color-3" data-ir="clustering"><svg><use href="#i-arbol"/></svg>
+                <span class="etiqueta">Requerimiento 2</span><strong>Agrupamiento jerárquico</strong>
+                <span>Dendrogramas con enlace simple, completo y promedio, evaluados con correlación cofenética y silueta.</span>
+                <span class="ir">Ver solución <svg><use href="#i-flecha"/></svg></span></button>
+            <button class="tarjeta-submenu color-4" data-ir="busqueda"><svg><use href="#i-buscar"/></svg>
+                <span class="etiqueta">Requerimiento 3</span><strong>Búsqueda de patrones</strong>
+                <span>Ocurrencias exactas de un patrón con Knuth-Morris-Pratt, Boyer-Moore y Rabin-Karp.</span>
+                <span class="ir">Ver solución <svg><use href="#i-flecha"/></svg></span></button>
+        </div>
+    </section>
+
+    <!-- ================= SIMILITUD (R1) ================= -->
+    <section id="vista-similitud" class="vista" data-padre="requerimientos">
+        <div class="migas"><button class="volver" data-ir="requerimientos"><svg><use href="#i-volver"/></svg>Requerimientos</button>
+            <span class="pestanas-req"><button data-ir="similitud" class="activo">R1</button><button data-ir="clustering">R2</button><button data-ir="busqueda">R3</button></span></div>
         <h2>Requerimiento 1 &mdash; Análisis de Similitud Textual</h2>
         <p>Selecciona <strong>dos o más</strong> artículos del corpus para comparar sus abstracts con 4 algoritmos clásicos y 2 algoritmos basados en
         Inteligencia Artificial. Con dos artículos se muestra el detalle de la comparación; con más, una matriz de similitud por algoritmo y el detalle de cada par.</p>
@@ -47,8 +206,10 @@
         <div id="resultado-similitud"></div>
     </section>
 
-    <!-- ================= CLUSTERING ================= -->
-    <section id="tab-clustering" class="tab-contenido">
+    <!-- ================= CLUSTERING (R2) ================= -->
+    <section id="vista-clustering" class="vista" data-padre="requerimientos">
+        <div class="migas"><button class="volver" data-ir="requerimientos"><svg><use href="#i-volver"/></svg>Requerimientos</button>
+            <span class="pestanas-req"><button data-ir="similitud">R1</button><button data-ir="clustering" class="activo">R2</button><button data-ir="busqueda">R3</button></span></div>
         <h2>Requerimiento 2 &mdash; Agrupamiento Jerárquico</h2>
         <p>Dendrogramas construidos sobre los 20 abstracts, usando distancia = 1 &minus; similitud del coseno (TF-IDF), con los 3 criterios de enlace exigidos.</p>
         <div id="resumen-clustering" class="cargando">Calculando clustering...</div>
@@ -71,8 +232,10 @@
         <div id="detalle-dendrograma"></div>
     </section>
 
-    <!-- ================= BUSQUEDA DE PATRONES ================= -->
-    <section id="tab-busqueda" class="tab-contenido">
+    <!-- ================= BUSQUEDA DE PATRONES (R3) ================= -->
+    <section id="vista-busqueda" class="vista" data-padre="requerimientos">
+        <div class="migas"><button class="volver" data-ir="requerimientos"><svg><use href="#i-volver"/></svg>Requerimientos</button>
+            <span class="pestanas-req"><button data-ir="similitud">R1</button><button data-ir="clustering">R2</button><button data-ir="busqueda" class="activo">R3</button></span></div>
         <h2>Requerimiento 3 &mdash; Búsqueda de patrones (coincidencia exacta de cadenas)</h2>
         <p>Escribe un patrón para localizar sus ocurrencias exactas en los 20 abstracts con <strong>Knuth-Morris-Pratt</strong>,
         <strong>Boyer-Moore</strong> y <strong>Rabin-Karp</strong>, implementados desde cero (sin <code>indexOf</code>, <code>find</code> ni expresiones regulares).</p>
@@ -96,9 +259,23 @@
         <div id="resultado-busqueda"></div>
     </section>
 
-    <!-- ================= RANKING (SEGUIMIENTO) ================= -->
-    <section id="tab-ranking" class="tab-contenido">
-        <h2>Seguimiento &mdash; Ranking de términos mediante algoritmos de ordenamiento</h2>
+    <!-- ================= SEGUIMIENTO (menu) ================= -->
+    <section id="vista-seguimiento" class="vista">
+        <h2>Seguimiento</h2>
+        <p>Entrega de seguimiento del curso: a partir del preprocesamiento de los 20 abstracts, la aplicación genera el listado de los términos más
+        frecuentes del corpus y lo ordena con tres algoritmos que no se basan en comparaciones.</p>
+        <div class="tarjetas-submenu">
+            <button class="tarjeta-submenu color-5" data-ir="ranking"><svg><use href="#i-seguimiento"/></svg>
+                <span class="etiqueta">Seguimiento</span><strong>Ranking de términos</strong>
+                <span>Counting Sort, Radix Sort y Bucket Sort: tiempos medidos, top 15 de cada algoritmo y validación del orden.</span>
+                <span class="ir">Ver ranking <svg><use href="#i-flecha"/></svg></span></button>
+        </div>
+    </section>
+
+    <!-- ================= RANKING ================= -->
+    <section id="vista-ranking" class="vista" data-padre="seguimiento">
+        <div class="migas"><button class="volver" data-ir="seguimiento"><svg><use href="#i-volver"/></svg>Seguimiento</button></div>
+        <h2>Ranking de términos mediante algoritmos de ordenamiento</h2>
         <p>Lista de frecuencias de los términos de los 20 abstracts (sin stopwords, sin stemming), ordenada de mayor a menor con tres
         algoritmos que <strong>no comparan</strong> elementos entre sí: Counting Sort, Radix Sort y Bucket Sort.</p>
         <div class="selector-articulos">
@@ -115,21 +292,22 @@
         <div id="resultado-ranking"></div>
     </section>
 
-    <!-- ================= ACERCA ================= -->
-    <section id="tab-acerca" class="tab-contenido">
-        <h2>Acerca del proyecto</h2>
-        <p>Esta aplicación implementa, desde cero (sin funciones de alto nivel de similitud/clustering), los algoritmos exigidos por el proyecto de curso
-        <em>"Análisis de algoritmos en el contexto de la bibliometría"</em>:</p>
-        <ul>
-            <li><strong>Requerimiento 1:</strong> Levenshtein, Needleman-Wunsch, Similitud del Coseno (TF-IDF) y Coeficiente de Jaccard (algoritmos clásicos); dos enfoques de embeddings preentrenados, GloVe 100d y FastText 300d, cada uno comparado con similitud del coseno y distancia euclidiana (algoritmos de IA).</li>
-            <li><strong>Requerimiento 2:</strong> Clustering jerárquico aglomerativo con enlace simple, completo y promedio (UPGMA), evaluado con el Coeficiente de Correlación Cofenética.</li>
-            <li><strong>Requerimiento 3:</strong> búsqueda de patrones con Knuth-Morris-Pratt, Boyer-Moore (caracter malo y sufijo bueno) y Rabin-Karp (rolling hash), con medición separada de los tiempos de preprocesamiento y de búsqueda.</li>
-            <li><strong>Seguimiento:</strong> ranking de los términos más frecuentes del corpus con Counting Sort, Radix Sort y Bucket Sort, con medición de tiempos en milisegundos.</li>
-        </ul>
-        <p>El backend es una aplicación Java (JDK 17+) sin dependencias externas: usa <code>com.sun.net.httpserver</code> para la API REST y un
-        parser/escritor JSON propio. El uso de herramientas de IA generativa como apoyo al desarrollo se declara explícitamente en el documento técnico
-        del repositorio (carpeta <code>docs/</code>).</p>
-        <p>Repositorio: rama <code>develop</code> para el desarrollo, rama <code>main</code> para el despliegue.</p>
+    <!-- ================= DOCUMENTOS ================= -->
+    <section id="vista-documentos" class="vista">
+        <h2>Documentos</h2>
+        <p>Documentos entregados del proyecto. Puedes verlos aquí mismo o descargarlos.</p>
+        <div class="documentos">
+            <div class="documento" data-archivo="/documentos/seguimiento.pdf">
+                <svg class="icono-documento"><use href="#i-documentos"/></svg>
+                <div class="documento-texto"><strong>Documento del seguimiento</strong>
+                    <span>Ranking de términos mediante algoritmos de ordenamiento no comparativos (PDF)</span></div>
+                <div class="documento-acciones">
+                    <button class="btn-documento" data-accion="ver"><svg><use href="#i-ver"/></svg>Ver</button>
+                    <a class="btn-documento secundario" href="/documentos/seguimiento.pdf" download="Seguimiento - Ranking de terminos.pdf"><svg><use href="#i-descargar"/></svg>Descargar</a>
+                </div>
+            </div>
+        </div>
+        <div id="visor-documento"></div>
     </section>
 </main>
 

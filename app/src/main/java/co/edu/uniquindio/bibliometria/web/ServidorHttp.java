@@ -341,12 +341,16 @@ public class ServidorHttp {
     // -----------------------------------------------------------------
 
     /**
-     * Sirve los archivos del frontend (HTML, CSS, JS) guardados en la carpeta
-     * {@code static/} de los recursos. La raiz "/" muestra {@code index.html};
-     * si el archivo no existe responde 404.
+     * Sirve los archivos del frontend (HTML, CSS, JS, imagenes y PDF) guardados
+     * en la carpeta {@code static/} de los recursos. La raiz "/" muestra
+     * {@code index.html}; si el archivo no existe responde 404. Acepta GET y
+     * HEAD: con HEAD solo envia las cabeceras, lo que usa la pestana Documentos
+     * para saber si un PDF esta disponible sin descargarlo.
      */
     private void manejarEstatico(HttpExchange exchange) throws IOException {
-        if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+        String metodo = exchange.getRequestMethod();
+        boolean soloCabeceras = "HEAD".equalsIgnoreCase(metodo);
+        if (!"GET".equalsIgnoreCase(metodo) && !soloCabeceras) {
             responderJson(exchange, 405, Map.of("error", "Metodo no soportado"));
             return;
         }
@@ -359,12 +363,22 @@ public class ServidorHttp {
 
         try (InputStream is = ServidorHttp.class.getResourceAsStream(recurso)) {
             if (is == null) {
-                responderTexto(exchange, 404, "No encontrado: " + path);
+                if (soloCabeceras) {
+                    exchange.sendResponseHeaders(404, -1);
+                    exchange.close();
+                } else {
+                    responderTexto(exchange, 404, "No encontrado: " + path);
+                }
+                return;
+            }
+            String tipoContenido = detectarTipoContenido(path);
+            exchange.getResponseHeaders().set("Content-Type", tipoContenido);
+            if (soloCabeceras) {
+                exchange.sendResponseHeaders(200, -1);   // -1: respuesta sin cuerpo
+                exchange.close();
                 return;
             }
             byte[] contenido = leerTodo(is);
-            String tipoContenido = detectarTipoContenido(path);
-            exchange.getResponseHeaders().set("Content-Type", tipoContenido);
             exchange.sendResponseHeaders(200, contenido.length);
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(contenido);
@@ -383,6 +397,8 @@ public class ServidorHttp {
         if (path.endsWith(".json")) return "application/json; charset=utf-8";
         if (path.endsWith(".svg")) return "image/svg+xml";
         if (path.endsWith(".png")) return "image/png";
+        if (path.endsWith(".jpg") || path.endsWith(".jpeg")) return "image/jpeg";
+        if (path.endsWith(".pdf")) return "application/pdf";
         return "application/octet-stream";
     }
 
