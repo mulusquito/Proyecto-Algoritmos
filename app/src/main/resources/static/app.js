@@ -136,6 +136,7 @@ const VIDEOS = [
     { requerimiento: "Requerimiento 1: Similitud textual", titulo: "Algoritmo de Levenshtein (parte 2)", id: "hzA7urO6iJU" },
     { requerimiento: "Requerimiento 1: Similitud textual", titulo: "Algoritmo de Needleman-Wunsch (parte 1)", id: "YsqOlh3Hm7g" },
     { requerimiento: "Requerimiento 1: Similitud textual", titulo: "Algoritmo de Needleman-Wunsch (parte 2)", id: "XpQy21IQzhU" },
+    { requerimiento: "Requerimiento 1: Similitud textual", titulo: "Similitud del coseno con TF-IDF", id: "xl1E4Gk3EFc" },
     { requerimiento: "Requerimiento 1: Similitud textual", titulo: "Coeficiente de Jaccard", id: "UOh0wBETTxA" },
     { requerimiento: "Requerimiento 1: Similitud textual", titulo: "Algoritmos de IA: GloVe y FastText", id: "Ta1ba0Jqn1k" },
     { requerimiento: "Requerimiento 2: Agrupamiento jerárquico", titulo: "Construcción de la matriz de distancias", id: "6czf32Cm-Wc" },
