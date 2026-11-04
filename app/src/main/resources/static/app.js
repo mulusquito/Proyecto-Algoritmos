@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     configurarNavegacion();
     configurarTabsClustering();
     configurarDocumentos();
+    renderizarVideos();
     ejecutarConAviso(cargarArticulos, "tabla-articulos");
     document.getElementById("btn-comparar").addEventListener("click", () => ejecutarConAviso(ejecutarComparacion, "resultado-similitud"));
     document.getElementById("btn-medir").addEventListener("click", () => ejecutarConAviso(cargarRanking, "resumen-ranking"));
@@ -123,6 +124,66 @@ async function verDocumento(doc) {
 function marcarDocumentoNoDisponible(doc) {
     doc.classList.add("no-disponible");
     doc.querySelector(".documento-texto span").textContent += " — no disponible en esta instalación";
+}
+
+// ------------------------------------------------------------
+// Videos demostrativos
+// ------------------------------------------------------------
+// Los videos estan publicados en YouTube (visibilidad "oculto"): la aplicacion solo guarda su identificador,
+// muestra la miniatura que genera YouTube y, al hacer clic, los reproduce dentro de la pagina.
+const VIDEOS = [
+    { requerimiento: "Requerimiento 1: Similitud textual", titulo: "Algoritmo de Levenshtein (parte 1)", id: "_88NTN9HRR0" },
+    { requerimiento: "Requerimiento 1: Similitud textual", titulo: "Algoritmo de Levenshtein (parte 2)", id: "hzA7urO6iJU" },
+    { requerimiento: "Requerimiento 1: Similitud textual", titulo: "Algoritmo de Needleman-Wunsch (parte 1)", id: "YsqOlh3Hm7g" },
+    { requerimiento: "Requerimiento 1: Similitud textual", titulo: "Algoritmo de Needleman-Wunsch (parte 2)", id: "XpQy21IQzhU" },
+    { requerimiento: "Requerimiento 1: Similitud textual", titulo: "Coeficiente de Jaccard", id: "UOh0wBETTxA" },
+    { requerimiento: "Requerimiento 1: Similitud textual", titulo: "Algoritmos de IA: GloVe y FastText", id: "Ta1ba0Jqn1k" },
+    { requerimiento: "Requerimiento 2: Agrupamiento jerárquico", titulo: "Construcción de la matriz de distancias", id: "6czf32Cm-Wc" },
+    { requerimiento: "Requerimiento 2: Agrupamiento jerárquico", titulo: "Análisis matemático y ejecución del agrupamiento", id: "8K86TjcnQuc" },
+    { requerimiento: "Requerimiento 3: Búsqueda de patrones", titulo: "Búsqueda del patrón con Knuth-Morris-Pratt", id: "xqTKj21gLaI" },
+    { requerimiento: "Requerimiento 3: Búsqueda de patrones", titulo: "Llenado de la función de prefijo de Knuth-Morris-Pratt", id: "AGpZkWC1DcU" },
+];
+
+// Dibuja la lista de videos agrupada por requerimiento, numerada en el orden de VIDEOS.
+function renderizarVideos() {
+    let html = "";
+    let grupoActual = null;
+    VIDEOS.forEach((v, i) => {
+        if (v.requerimiento !== grupoActual) {
+            if (grupoActual !== null) html += `</div>`;
+            grupoActual = v.requerimiento;
+            html += `<h3 class="titulo-seccion">${escaparHtml(grupoActual)}</h3><div class="videos">`;
+        }
+        html += `<button class="video" data-indice="${i}">
+            <span class="video-miniatura"><img src="https://i.ytimg.com/vi/${v.id}/mqdefault.jpg" alt="" loading="lazy">
+                <svg class="video-play"><use href="#i-videos"/></svg></span>
+            <span class="video-texto"><span class="video-numero">Video ${i + 1}</span><strong>${escaparHtml(v.titulo)}</strong></span>
+        </button>`;
+    });
+    if (grupoActual !== null) html += `</div>`;
+    document.getElementById("lista-videos").innerHTML = html;
+    document.querySelectorAll(".video").forEach(boton => {
+        boton.addEventListener("click", () => reproducirVideo(parseInt(boton.dataset.indice, 10)));
+    });
+}
+
+// Muestra el reproductor encima de la lista con el video elegido.
+function reproducirVideo(indice) {
+    const v = VIDEOS[indice];
+    const reproductor = document.getElementById("reproductor-video");
+    document.querySelectorAll(".video").forEach(b => b.classList.toggle("activo", b.dataset.indice === String(indice)));
+    reproductor.innerHTML = `<div class="visor-cabecera"><strong>Video ${indice + 1}: ${escaparHtml(v.titulo)}</strong>
+        <button class="btn-ver" id="btn-cerrar-video">Cerrar</button></div>
+        <div class="video-marco"><iframe src="https://www.youtube-nocookie.com/embed/${v.id}?autoplay=1&rel=0"
+            title="${escaparHtml(v.titulo)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>`;
+    document.getElementById("btn-cerrar-video").addEventListener("click", () => {
+        reproductor.innerHTML = "";
+        document.querySelectorAll(".video").forEach(b => b.classList.remove("activo"));
+    });
+    // Se desplaza hasta el reproductor dejando visible su titulo debajo del encabezado fijo.
+    const alturaEncabezado = document.querySelector(".encabezado").offsetHeight;
+    const destino = reproductor.getBoundingClientRect().top + window.scrollY - alturaEncabezado - 12;
+    window.scrollTo({ top: destino, behavior: "smooth" });
 }
 
 // Botones Single / Complete / Average: cambian el dendrograma que se dibuja sin volver a pedir datos.

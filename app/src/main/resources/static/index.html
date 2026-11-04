@@ -17,6 +17,7 @@
     <symbol id="i-requerimientos" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4.5" cy="6" r="1.4"/><circle cx="4.5" cy="12" r="1.4"/><circle cx="4.5" cy="18" r="1.4"/></symbol>
     <symbol id="i-seguimiento" viewBox="0 0 24 24"><path d="M3 18l6-6 4 4 8-8"/><path d="M15 8h6v6"/></symbol>
     <symbol id="i-documentos" viewBox="0 0 24 24"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3v5h5"/><path d="M9 15.5h6"/></symbol>
+    <symbol id="i-videos" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M10 9.2v5.6l4.8-2.8z"/></symbol>
     <symbol id="i-flecha" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
     <symbol id="i-volver" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
     <symbol id="i-similitud" viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="12" rx="1.5"/><rect x="13" y="8" width="8" height="12" rx="1.5"/><path d="M6 8h2M6 11h2M16 12h2M16 15h2"/></symbol>
@@ -43,6 +44,7 @@
         <button class="menu-btn" data-vista="requerimientos"><svg><use href="#i-requerimientos"/></svg>Requerimientos</button>
         <button class="menu-btn" data-vista="seguimiento"><svg><use href="#i-seguimiento"/></svg>Seguimiento</button>
         <button class="menu-btn" data-vista="documentos"><svg><use href="#i-documentos"/></svg>Documentos</button>
+        <button class="menu-btn" data-vista="videos"><svg><use href="#i-videos"/></svg>Videos demostrativos</button>
     </nav>
 </header>
 
@@ -107,6 +109,8 @@
                 <strong>Seguimiento</strong><span>Ranking de términos</span><svg class="flecha"><use href="#i-flecha"/></svg></button>
             <button class="tarjeta-inicio color-6" data-ir="documentos"><svg><use href="#i-documentos"/></svg>
                 <strong>Documentos</strong><span>PDF del seguimiento</span><svg class="flecha"><use href="#i-flecha"/></svg></button>
+            <button class="tarjeta-inicio color-1" data-ir="videos"><svg><use href="#i-videos"/></svg>
+                <strong>Videos demostrativos</strong><span>Demostraciones paso a paso</span><svg class="flecha"><use href="#i-flecha"/></svg></button>
         </div>
     </section>
 
@@ -308,6 +312,15 @@
             </div>
         </div>
         <div id="visor-documento"></div>
+    </section>
+
+    <!-- ================= VIDEOS DEMOSTRATIVOS ================= -->
+    <section id="vista-videos" class="vista">
+        <h2>Videos demostrativos</h2>
+        <p>Demostraciones matemáticas paso a paso de los algoritmos del proyecto, con su trazabilidad en el código.
+        Haz clic en un video para reproducirlo aquí mismo.</p>
+        <div id="reproductor-video"></div>
+        <div id="lista-videos"></div>
     </section>
 </main>
 
